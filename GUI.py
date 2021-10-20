@@ -8,6 +8,7 @@ from firebase_admin import storage
 import os
 from zipfile import ZipFile
 import cv2
+from cursorClass import *
 from imutils import resize
 from PIL import Image
 from PIL import ImageTk
@@ -36,7 +37,7 @@ class Tab1(ttk.Frame):
 
         # Variables
         self.folder_var = tk.StringVar(value="Carpeta no seleccionada")
-        self.patientID_var = tk.StringVar(value='1234')
+        self.patientID_var = tk.StringVar(value='')
         self.movement_var = tk.StringVar(value="Seleccione movimiento")
         self.hand_var = tk.StringVar(value="Seleccione mano")
         self.test_var = tk.StringVar(value="Seleccione prueba")
@@ -50,7 +51,7 @@ class Tab1(ttk.Frame):
         self.csv_path = ''
 
         # Assets
-        self.entry_img = tk.PhotoImage(file="/Users/camilaroa/PycharmProjects/parkinsonApp/assets/entry.png")
+        self.entry_img = tk.PhotoImage(file="/Users/santiagorojasjaramillo/PycharmProjects/ParkinsonVideoApp/assets/entry.png")
         self.btn_search_img = tk.PhotoImage(file=relative_to_assets("btn_search.png"))
         self.bg_dropdown_img = tk.PhotoImage(file=relative_to_assets("bg_dropdown.png"))
         self.btn_process_img = tk.PhotoImage(file=relative_to_assets("btn_process.png"))
@@ -165,36 +166,39 @@ class Tab1(ttk.Frame):
     def download_test(self):
         # Download test folder from Firebase
         # global bucket
-        # download_folder = self.folder_var.get()
-        # pID = self.patientID_var.get()
-        # test = self.test_var.get()
-        # # Download test files from firebase, but first check if folder already exists
-        # folder_path = pID + '/' + test
-        # if not os.path.isdir(download_folder + '/' + pID):
-        #     os.mkdir(download_folder + '/' + pID)
-        # if not os.path.isdir(download_folder + '/' + folder_path):
-        #     os.mkdir(download_folder + '/' + folder_path)
-        #     firebase_path = pID + '/' + test[0:2] + test[3:5] + test[6:10] + "_" + test[12:14] + test[15:17] + "_" + test[19:21]
-        #     blob = bucket.blob(firebase_path + '/test.zip')
-        #     blob.download_to_filename(download_folder + '/' + folder_path + "/test.zip")
-        #     # Extract all files to folder
-        #     with ZipFile(download_folder + '/' + folder_path + "/test.zip", 'r') as f:
-        #         f.printdir()
-        #         f.extractall(download_folder + '/' + folder_path)
-        #     # Delete ZIP
-        #     os.remove(download_folder + '/' + folder_path + "/test.zip")
-        #
-        # self.mov_eval, hand_name = get_moveval(self.movement_var.get(), self.hand_var.get())
-        # video_path = download_folder + '/' + folder_path + '/' + mov_eval + hand_name + '.mp4'
-        # self.csv_path = download_folder + '/' + folder_path + '/' + mov_eval + hand_name + '.csv'
+        download_folder = self.folder_var.get()
+        pID = self.patientID_var.get()
+        test = self.test_var.get()
+        if ('Seleccione' in (test or self.hand_var.get() or self.movement_var.get())):
+            self.process_var.set("Debe seleccionar una opción en todos los campos.")
+            return
+        # Download test files from firebase, but first check if folder already exists
+        folder_path = pID + '/' + test
+        if not os.path.isdir(download_folder + '/' + pID):
+            os.mkdir(download_folder + '/' + pID)
+        if not os.path.isdir(download_folder + '/' + folder_path):
+            os.mkdir(download_folder + '/' + folder_path)
+            firebase_path = pID + '/' + test[0:2] + test[3:5] + test[6:10] + "_" + test[12:14] + test[15:17] + "_" + test[19:21]
+            blob = bucket.blob(firebase_path + '/test.zip')
+            blob.download_to_filename(download_folder + '/' + folder_path + "/test.zip")
+            # Extract all files to folder
+            with ZipFile(download_folder + '/' + folder_path + "/test.zip", 'r') as f:
+                f.printdir()
+                f.extractall(download_folder + '/' + folder_path)
+            # Delete ZIP
+            os.remove(download_folder + '/' + folder_path + "/test.zip")
 
-        # self.video_cap = cv2.VideoCapture(video_path)
+        self.mov_eval, hand_name = get_moveval(self.movement_var.get(), self.hand_var.get())
+        video_path = download_folder + '/' + folder_path + '/' + self.mov_eval + hand_name + '.mp4'
+        self.csv_path = download_folder + '/' + folder_path + '/' + self.mov_eval + hand_name + '.csv'
+
+        self.video_cap = cv2.VideoCapture(video_path)
 
         # Prueba
-        self.mov_eval = 'fingertap'
-        video_path = '/Users/camilaroa/Desktop/mytest/1234/26-09-2021, 16:55, OFF/fingertap_r.mp4'
-        self.csv_path = '/Users/camilaroa/Desktop/mytest/1234/26-09-2021, 16:55, OFF/fingertap_r.csv'
-        self.video_cap = cv2.VideoCapture('/Users/camilaroa/Desktop/mytest/1234/26-09-2021, 16:55, OFF/fingertap_r.mp4')
+        #self.mov_eval = 'fingertap'
+        #video_path = '/Users/santiagorojasjaramillo/Desktop/Prueba_1234/fingertap_r.mp4'
+        # self.csv_path = '/Users/santiagorojasjaramillo/Desktop/mov_csv/fingertap_r.csv'
+        #self.video_cap = cv2.VideoCapture(video_path)
         # Prueba
 
         self.video_fps = self.video_cap.get(cv2.CAP_PROP_FPS)
@@ -270,6 +274,11 @@ class Tab2(ttk.Frame):
         self.toggle1 = True
         self.toggle2 = True
 
+        self.bandera1 = True
+        self.bandera2 = True
+        self.bandera3 = True
+        self.bandera4 = True
+
         self.create_widgets()
 
     def create_widgets(self):
@@ -299,6 +308,34 @@ class Tab2(ttk.Frame):
                               command=self.toggle_plot2, relief="flat")
         plot2_btn.place(x=1020.0, y=574.0, width=206.0, height=47.0)
 
+        cursor_graph1_btn = tk.Button(self, text='Cursor 1',
+                                      borderwidth=0,
+                                      highlightthickness=0,
+                                      command=lambda: self.cursor_graph1(),
+                                      relief="flat")
+        cursor_graph1_btn.place(x=80, y=574.0, width=206.0, height=47.0)
+
+        cursor_graph2_btn = tk.Button(self, text='Cursor 2',
+                                      borderwidth=0,
+                                      highlightthickness=0,
+                                      command=lambda: self.cursor_graph2(),
+                                      relief="flat")
+        cursor_graph2_btn.place(x=80, y=630.0, width=206.0, height=47.0)
+
+        cursor_graph3_btn = tk.Button(self, text='Cursor 3',
+                                      borderwidth=0,
+                                      highlightthickness=0,
+                                      command=lambda: self.cursor_graph3(),
+                                      relief="flat")
+        cursor_graph3_btn.place(x=700, y=574.0, width=206.0, height=47.0)
+
+        cursor_graph4_btn = tk.Button(self, text='Cursor 4',
+                                      borderwidth=0,
+                                      highlightthickness=0,
+                                      command=lambda: self.cursor_graph4(),
+                                      relief="flat")
+        cursor_graph4_btn.place(x=700, y=630.0, width=206.0, height=47.0)
+
     def analyze_video(self):
         # Get features from video
         global tab1
@@ -311,25 +348,25 @@ class Tab2(ttk.Frame):
         video_features.filtered_signal()
         video_features.calc_speed()
 
-        t_amp, mov_amp1, amp_trend1, mov_amp2, amp_trend2 = video_features.calc_amplitude()
+        self.t_amp, self.mov_amp1, self.amp_trend1, self.mov_amp2, self.amp_trend2 = video_features.calc_amplitude()
 
-        t1, dedo1, dedo2, t2, dedo1_seg, dedo2_seg, t3, dedo1_vel, dedo2_vel = video_features.get_plot()
+        self.t1, self.dedo1, self.dedo2, self.t2, self.dedo1_seg, self.dedo2_seg, self.t3, self.dedo1_vel, self.dedo2_vel = video_features.get_plot()
 
         self.fig1 = Figure(figsize=(5, 4), dpi=100)
-        plot1 = self.fig1.add_subplot(111)
-        plot1.plot(t1, dedo1)
-        plot1.plot(t1, dedo2)
-        plot1.set_xlabel('Tiempo (s)')
-        plot1.set_ylabel('Amplitud')
+        self.plot1 = self.fig1.add_subplot(111)
+        self.plot1.plot(self.t1, self.dedo1)
+        self.plot1.plot(self.t1, self.dedo2)
+        self.plot1.set_xlabel('Tiempo (s)')
+        self.plot1.set_ylabel('Amplitud')
         if mov == 'Golpeteo de dedos':
-            plot1.set_title('Finger tapping en y - original')
-            plot1.legend(['Pulgar', 'Índice'], loc='upper right')
+            self.plot1.set_title('Finger tapping en y - original')
+            self.plot1.legend(['Pulgar', 'Índice'], loc='upper right')
         elif mov == 'Prono supinacion':
-            plot1.set_title('Prono-supinación en x - original')
-            plot1.legend(['Pulgar', 'Meñique'], loc='upper right')
+            self.plot1.set_title('Prono-supinación en x - original')
+            self.plot1.legend(['Pulgar', 'Meñique'], loc='upper right')
         elif mov == 'Cierre de puño':
-            plot1.set_title('Fist open-close en y - original')
-            plot1.legend(['Pulgar', 'Meñique'], loc='upper right')
+            self.plot1.set_title('Fist open-close en y - original')
+            self.plot1.legend(['Pulgar', 'Meñique'], loc='upper right')
         self.fig1.tight_layout()
 
         canvasf = FigureCanvasTkAgg(self.fig1, master=self)
@@ -337,39 +374,39 @@ class Tab2(ttk.Frame):
         canvasf.get_tk_widget().place(x=80.0, y=145.0)
 
         self.fig2 = Figure(figsize=(5, 4), dpi=100)
-        plot2 = self.fig2.add_subplot(111)
-        plot2.plot(t2, dedo1_seg)
-        plot2.plot(t2, dedo2_seg)
-        plot2.set_xlabel('Tiempo (s)')
-        plot2.set_ylabel('Amplitud')
+        self.plot2 = self.fig2.add_subplot(111)
+        self.plot2.plot(self.t2, self.dedo1_seg)
+        self.plot2.plot(self.t2, self.dedo2_seg)
+        self.plot2.set_xlabel('Tiempo (s)')
+        self.plot2.set_ylabel('Amplitud')
         if mov == 'Golpeteo de dedos':
-            plot2.set_title('Finger tapping en y - segmentada')
-            plot2.legend(['Pulgar', 'Índice'], loc='upper right')
+            self.plot2.set_title('Finger tapping en y - segmentada')
+            self.plot2.legend(['Pulgar', 'Índice'], loc='upper right')
         elif mov == 'Prono supinacion':
-            plot2.set_title('Prono-supinación en x - segmentada')
-            plot2.legend(['Pulgar', 'Meñique'], loc='upper right')
+            self.plot2.set_title('Prono-supinación en x - segmentada')
+            self.plot2.legend(['Pulgar', 'Meñique'], loc='upper right')
         elif mov == 'Cierre de puño':
-            plot2.set_title('Fist open-close en y - segmentada')
-            plot2.legend(['Pulgar', 'Meñique'], loc='upper right')
+            self.plot2.set_title('Fist open-close en y - segmentada')
+            self.plot2.legend(['Pulgar', 'Meñique'], loc='upper right')
         self.fig2.tight_layout()
 
         # x=80, y=145
 
         self.fig3 = Figure(figsize=(5, 4), dpi=100)
-        plot3 = self.fig3.add_subplot(111)
-        plot3.plot(t3, dedo1_vel)
-        plot3.plot(t3, dedo2_vel)
-        plot3.set_xlabel('Tiempo (s)')
-        plot3.set_ylabel('Velocidad')
+        self.plot3 = self.fig3.add_subplot(111)
+        self.plot3.plot(self.t3, self.dedo1_vel)
+        self.plot3.plot(self.t3, self.dedo2_vel)
+        self.plot3.set_xlabel('Tiempo (s)')
+        self.plot3.set_ylabel('Velocidad')
         if mov == 'Golpeteo de dedos':
-            plot3.set_title('Finger tapping en y - velocidad')
-            plot3.legend(['Pulgar', 'Índice'], loc='upper right')
+            self.plot3.set_title('Finger tapping en y - velocidad')
+            self.plot3.legend(['Pulgar', 'Índice'], loc='upper right')
         elif mov == 'Prono supinacion':
-            plot3.set_title('Prono-supinación en x - velocidad')
-            plot3.legend(['Pulgar', 'Meñique'], loc='upper right')
+            self.plot3.set_title('Prono-supinación en x - velocidad')
+            self.plot3.legend(['Pulgar', 'Meñique'], loc='upper right')
         elif mov == 'Cierre de puño':
-            plot3.set_title('Fist open-close en y - velocidad')
-            plot3.legend(['Pulgar', 'Meñique'], loc='upper right')
+            self.plot3.set_title('Fist open-close en y - velocidad')
+            self.plot3.legend(['Pulgar', 'Meñique'], loc='upper right')
         self.fig3.tight_layout()
 
         canvasf = FigureCanvasTkAgg(self.fig3, master=self)
@@ -378,21 +415,21 @@ class Tab2(ttk.Frame):
         # x=680, y=145
 
         self.fig4 = Figure(figsize=(5, 4), dpi=100)
-        plot4 = self.fig4.add_subplot(111)
-        plot4.plot(t_amp, mov_amp1, 'tab:blue')
-        plot4.plot(t_amp, amp_trend1, color='tab:blue', linestyle=':')
-        plot4.plot(t_amp, mov_amp2, color='tab:orange')
-        plot4.plot(t_amp, amp_trend2, color='tab:orange', linestyle=':')
-        plot4.set_title("Tendencias de amplitud de las señales - " + mov)
-        plot4.set_xlabel('Tiempo(s)')
-        plot4.set_ylabel('Amplitud')
+        self.plot4 = self.fig4.add_subplot(111)
+        self.plot4.plot(self.t_amp, self.mov_amp1, 'tab:blue')
+        self.plot4.plot(self.t_amp, self.amp_trend1, color='tab:blue', linestyle=':')
+        self.plot4.plot(self.t_amp, self.mov_amp2, color='tab:orange')
+        self.plot4.plot(self.t_amp, self.amp_trend2, color='tab:orange', linestyle=':')
+        self.plot4.set_title("Tendencias de amplitud de las señales - " + mov)
+        self.plot4.set_xlabel('Tiempo(s)')
+        self.plot4.set_ylabel('Amplitud')
         if mov == 'Golpeteo de dedos':
-            plot4.legend(['Pulgar', "Tendencia pulgar", 'Índice', "Tendencia indice"], loc='upper right')
+            self.plot4.legend(['Pulgar', "Tendencia pulgar", 'Índice', "Tendencia indice"], loc='upper right')
         elif mov == 'Prono supinacion':
-            plot4.legend(['Pulgar', "Tendencia pulgar", 'Meñique', "Tendencia meñique"], loc='upper right')
+            self.plot4.legend(['Pulgar', "Tendencia pulgar", 'Meñique', "Tendencia meñique"], loc='upper right')
         elif mov == 'Cierre de puño':
             # plot4.set_title("Falta arreglar fist open close en extraccion!!!") #No se si aun falta arreglar, toca revisar
-            plot4.legend(['Pulgar', 'Meñique'], loc='upper right')
+            self.plot4.legend(['Pulgar', 'Meñique'], loc='upper right')
         self.fig4.tight_layout()
 
     def toggle_plot1(self):
@@ -416,6 +453,58 @@ class Tab2(ttk.Frame):
             canvasf.draw()
             canvasf.get_tk_widget().place(x=690.0, y=145.0)
         self.toggle2 = not self.toggle2
+
+    def cursor_graph1(self):
+        if self.bandera1:
+            self.cursor1 = SnaptoCursor(self.plot1, self.t1, self.dedo1, "crimson")
+            self.cid1 = self.fig1.canvas.mpl_connect('motion_notify_event', self.cursor1.mouse_move)
+            self.cursor3 = SnaptoCursor(self.plot2, self.t2, self.dedo1_seg, "crimson")
+            self.cid3 = self.fig2.canvas.mpl_connect('motion_notify_event', self.cursor3.mouse_move)
+        else:
+            self.cursor1.delete_cursor()
+            self.cursor3.delete_cursor()
+            self.fig1.canvas.mpl_disconnect(self.cid1)
+            self.fig2.canvas.mpl_disconnect(self.cid3)
+        self.bandera1 = not self.bandera1
+
+    def cursor_graph2(self):
+        if self.bandera2:
+            self.cursor2 = SnaptoCursor(self.plot1, self.t1, self.dedo2, "blue")
+            self.cid2 = self.fig1.canvas.mpl_connect('motion_notify_event', self.cursor2.mouse_move)
+            self.cursor4 = SnaptoCursor(self.plot2, self.t2, self.dedo2_seg, "blue")
+            self.cid4 = self.fig2.canvas.mpl_connect('motion_notify_event', self.cursor4.mouse_move)
+        else:
+            self.cursor2.delete_cursor()
+            self.cursor4.delete_cursor()
+            self.fig1.canvas.mpl_disconnect(self.cid2)
+            self.fig2.canvas.mpl_disconnect(self.cid4)
+        self.bandera2 = not self.bandera2
+
+    def cursor_graph3(self):
+        if self.bandera3:
+            self.cursor5 = SnaptoCursor(self.plot3, self.t3, self.dedo1_vel, "crimson")
+            self.cid5 = self.fig3.canvas.mpl_connect('motion_notify_event', self.cursor5.mouse_move)
+            self.cursor7 = SnaptoCursor(self.plot4, self.t_amp, self.mov_amp1, "crimson")
+            self.cid7 = self.fig4.canvas.mpl_connect('motion_notify_event', self.cursor7.mouse_move)
+        else:
+            self.cursor5.delete_cursor()
+            self.cursor7.delete_cursor()
+            self.fig3.canvas.mpl_disconnect(self.cid5)
+            self.fig4.canvas.mpl_disconnect(self.cid7)
+        self.bandera3 = not self.bandera3
+
+    def cursor_graph4(self):
+        if self.bandera4:
+            self.cursor6 = SnaptoCursor(self.plot3, self.t3, self.dedo2_vel, "blue")
+            self.cid6 = self.fig3.canvas.mpl_connect('motion_notify_event', self.cursor6.mouse_move)
+            self.cursor8 = SnaptoCursor(self.plot4, self.t_amp, self.mov_amp2, "blue")
+            self.cid8 = self.fig4.canvas.mpl_connect('motion_notify_event', self.cursor8.mouse_move)
+        else:
+            self.cursor6.delete_cursor()
+            self.cursor8.delete_cursor()
+            self.fig3.canvas.mpl_disconnect(self.cid6)
+            self.fig4.canvas.mpl_disconnect(self.cid8)
+        self.bandera4 = not self.bandera4
 
 
 def relative_to_assets(path: str) -> Path:
@@ -444,7 +533,7 @@ if __name__ == '__main__':
     ASSETS_PATH = Path(__file__).parent / Path("./assets")
 
     # Connect to FireBase
-    cred = credentials.Certificate('/Users/camilaroa/PycharmProjects/parkinsonApp/serviceAccountKey.json')
+    cred = credentials.Certificate('/Users/santiagorojasjaramillo/Desktop/serviceAccountKey.json')
     firebase_admin.initialize_app(cred, {'storageBucket': 'parkinsondata.appspot.com'})
     bucket = storage.bucket()
 

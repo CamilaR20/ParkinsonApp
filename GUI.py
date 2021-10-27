@@ -16,6 +16,8 @@ import feature_extraction
 from feature_extraction import Parkinson_movements
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from openpyxl import Workbook
+from openpyxl import load_workbook
 
 
 class App(tk.Tk):
@@ -41,6 +43,7 @@ class Tab1(ttk.Frame):
         self.movement_var = tk.StringVar(value="Seleccione movimiento")
         self.hand_var = tk.StringVar(value="Seleccione mano")
         self.test_var = tk.StringVar(value="Seleccione prueba")
+        self.updrs_var = tk.IntVar(value='UPDRS')
         self.process_var = tk.StringVar(value="")
 
         self.video_cap = None
@@ -102,17 +105,27 @@ class Tab1(ttk.Frame):
         hand_entry = tk.OptionMenu(self, self.hand_var, "Derecha", "Izquierda")
         hand_entry.place(x=70, y=380.0, width=250.0, height=30.0)
         hand_entry.config(bg='#FFFFFF', fg='#000000', font=("Roboto Bold", 16 * -1))
+
         movement_entry = tk.OptionMenu(self, self.movement_var, "Golpeteo de dedos", "Prono supinacion",
                                        "Cierre de puño")
         movement_entry.place(x=70, y=440.0, width=250.0, height=30.0)
         movement_entry.config(bg='#FFFFFF', fg='#000000', font=("Roboto Bold", 16 * -1))
+
         self.test_entry = tk.OptionMenu(self, self.test_var, 'No hay pruebas disponibles')
         self.test_entry.place(x=70, y=500, width=250.0, height=30.0)
         self.test_entry.config(bg='#FFFFFF', fg='#000000', font=("Roboto Bold", 16 * -1))
 
+        updrs_entry = tk.OptionMenu(self, self.updrs_var, '0', '1', '2', '3', '4')
+        updrs_entry.place(x=380, y=440, width=70.0, height=30.0)
+        updrs_entry.config(bg='#FFFFFF', fg='#000000', font=("Roboto Bold", 16 * -1))
+
         process_btn = tk.Button(self, image=self.btn_process_img, borderwidth=0, highlightthickness=0,
                                 command=self.download_test, relief="flat")
-        process_btn.place(x=320.0, y=620.0, width=200.0, height=47.0)
+        process_btn.place(x=80.0, y=620.0, width=200.0, height=47.0)
+
+        self.updrs_btn = tk.Button(self, text="Clasicación UPDRS", borderwidth=0, highlightthickness=0,
+                                command=self.updrs_clasificacion, relief="flat", state=tk.DISABLED)
+        self.updrs_btn.place(x=320.0, y=620.0, width=200.0, height=47.0)
 
         # Process Label
         self.process_label = tk.Label(self, textvariable=self.process_var, bd=0, bg="#FFFFFF", fg="#888888",
@@ -183,7 +196,7 @@ class Tab1(ttk.Frame):
             blob.download_to_filename(download_folder + '/' + folder_path + "/test.zip")
             # Extract all files to folder
             with ZipFile(download_folder + '/' + folder_path + "/test.zip", 'r') as f:
-                f.printdir()
+                #f.printdir()
                 f.extractall(download_folder + '/' + folder_path)
             # Delete ZIP
             os.remove(download_folder + '/' + folder_path + "/test.zip")
@@ -206,8 +219,36 @@ class Tab1(ttk.Frame):
 
         self.process_var.set("Procesando...")
         self.vid_first_frame()
+        self.updrs_btn['state'] = tk.NORMAL
 
         self.get_trajectory(video_path)
+
+    def updrs_clasificacion(self):
+        escala = self.updrs_var.get()
+        xlsx_folder = self.folder_var.get()
+        pID = self.patientID_var.get()
+        test = self.test_var.get()
+        hand = self.hand_var.get()
+        nombre_xlsx = xlsx_folder + "/ClasificacionVideos.xlsx"
+        if not os.path.exists(nombre_xlsx):
+            wb = Workbook()
+            # grab the active worksheet
+            ws = wb.active
+            ws['A1'] = 'ID del paciente'
+            ws['B1'] = 'Movimiento evaluado'
+            ws['C1'] = 'Mano'
+            ws['D1'] = 'Fecha de la prueba'
+            ws['E1'] = 'Clasificación UPDRS'
+            # Rows can also be appended
+            ws.append([pID, self.mov_eval, hand, test, escala])
+            # Save the file
+            wb.save(nombre_xlsx)
+        else:
+            wb = load_workbook(nombre_xlsx)
+            ws = wb.active
+            # Rows can also be appended
+            ws.append([pID, self.mov_eval, hand, test, escala])
+            wb.save(nombre_xlsx)
 
     def vid_first_frame(self):
         # Show first frame of selected video
@@ -409,9 +450,9 @@ class Tab2(ttk.Frame):
             self.plot3.legend(['Pulgar', 'Meñique'], loc='upper right')
         self.fig3.tight_layout()
 
-        canvasf = FigureCanvasTkAgg(self.fig3, master=self)
-        canvasf.draw()
-        canvasf.get_tk_widget().place(x=690.0, y=145.0)
+        self.canvasf = FigureCanvasTkAgg(self.fig3, master=self)
+        self.canvasf.draw()
+        self.canvasf.get_tk_widget().place(x=690.0, y=145.0)
         # x=680, y=145
 
         self.fig4 = Figure(figsize=(5, 4), dpi=100)

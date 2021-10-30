@@ -15,7 +15,8 @@ from PIL import ImageTk
 import feature_extraction
 from feature_extraction import Parkinson_movements
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
+from tkinter import messagebox
 from openpyxl import Workbook
 from openpyxl import load_workbook
 
@@ -116,7 +117,7 @@ class Tab1(ttk.Frame):
         self.test_entry.config(bg='#FFFFFF', fg='#000000', font=("Roboto Bold", 16 * -1))
 
         updrs_entry = tk.OptionMenu(self, self.updrs_var, '0', '1', '2', '3', '4')
-        updrs_entry.place(x=380, y=440, width=70.0, height=30.0)
+        updrs_entry.place(x=380, y=440, width=80.0, height=30.0)
         updrs_entry.config(bg='#FFFFFF', fg='#000000', font=("Roboto Bold", 16 * -1))
 
         process_btn = tk.Button(self, image=self.btn_process_img, borderwidth=0, highlightthickness=0,
@@ -160,6 +161,7 @@ class Tab1(ttk.Frame):
         self.hand_var.set("Seleccione mano")
         self.movement_var.set("Seleccione movimiento")
         self.test_var.set("Seleccione fecha")
+        self.updrs_var.set("UPDRS")
 
         # Get test names for patient ID
         test_list = []
@@ -229,25 +231,47 @@ class Tab1(ttk.Frame):
         pID = self.patientID_var.get()
         test = self.test_var.get()
         hand = self.hand_var.get()
+        filas_eliminadas = 2
         nombre_xlsx = xlsx_folder + "/ClasificacionVideos.xlsx"
         if not os.path.exists(nombre_xlsx):
             wb = Workbook()
             # grab the active worksheet
             ws = wb.active
+            fila_max_analizada = ws.max_row
             ws['A1'] = 'ID del paciente'
             ws['B1'] = 'Movimiento evaluado'
             ws['C1'] = 'Mano'
             ws['D1'] = 'Fecha de la prueba'
             ws['E1'] = 'Clasificación UPDRS'
-            # Rows can also be appended
-            ws.append([pID, self.mov_eval, hand, test, escala])
+            ws.append([str(pID), self.mov_eval, hand, test, escala])
+            fila_max_analizada += 1
             # Save the file
             wb.save(nombre_xlsx)
         else:
             wb = load_workbook(nombre_xlsx)
             ws = wb.active
-            # Rows can also be appended
-            ws.append([pID, self.mov_eval, hand, test, escala])
+            fila_max_analizada = ws.max_row
+            for row in ws.iter_rows(min_row=2, max_col=5, max_row=fila_max_analizada, values_only=True):
+                if row[0] == pID and row[1] == self.mov_eval and row[2] == hand and row[3] == test:
+                    if row[4] == escala:
+                        messagebox.showinfo(message="Esta prueba ya fue evaluada anteriormente", title="Prueba ya evaluada")
+                        return
+                    else:
+                        choice = messagebox.askyesno(message="Esta prueba ya fue evaluada con una escala"
+                                                    "diferente. ¿Desea cambiar evaluación?", title="Prueba ya evaluada")
+                        if choice:
+                            ws.delete_rows(filas_eliminadas, 1)
+                            ws.append([str(pID), self.mov_eval, hand, test, escala])
+                            fila_max_analizada += 1
+                            wb.save(nombre_xlsx)
+                            return
+                        else:
+                            return
+
+                filas_eliminadas += 1
+
+            ws.append([str(pID), self.mov_eval, hand, test, escala])
+            fila_max_analizada += 1
             wb.save(nombre_xlsx)
 
     def vid_first_frame(self):

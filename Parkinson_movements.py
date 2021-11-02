@@ -59,6 +59,9 @@ class Parkinson_movements:
         periods = periods_mov(self.t1, self.idx_max)
         plt.figure()
         plt.boxplot([periods[~np.isnan(periods[:, 25]), 25], periods[~np.isnan(periods[:, 29]), 29]])
+        plt.title("Mediana y distribución de la periodicidad - fingertap")
+        plt.xticks([1, 2], ['Pulgar', 'Índice'])
+        plt.ylabel('Distribución')
 
     def calc_fft(self):
         #FFT

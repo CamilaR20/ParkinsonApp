@@ -17,6 +17,8 @@ from Parkinson_movements import *
 from pathlib import Path
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.widgets import Cursor, Button
+from cursorClass import *
 from PIL import Image
 from PIL import ImageTk
 
@@ -26,7 +28,7 @@ cred = credentials.Certificate('/Users/santiagorojasjaramillo/Desktop/serviceAcc
 firebase_admin.initialize_app(cred, {'storageBucket': 'parkinsondata.appspot.com'})
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path("./assets")
+ASSETS_PATH = OUTPUT_PATH / Path("./assetsp")
 
 
 def relative_to_assets(path: str) -> Path:
@@ -60,8 +62,7 @@ def carpeta_descarga():
     canvas.delete(folder_id)
     folder_id = canvas.create_text(60.0, 127.0, anchor="nw", width=270, text=download_folder, fill="#000000", font=("Roboto", 14 * -1))
 
-img=None
-posicion = 0
+
 def visualizar():
     global cap
     global img
@@ -106,8 +107,6 @@ def btn_pausar():
     #
     # video_label.configure(image=img)
     # video_label.image = img
-
-
 
 
 def show_first_frame():
@@ -197,9 +196,25 @@ def archivo_csv(name_video, folder_download, mov_eval, dat):
 def procesar_video(nombre_csv):
     global test_id
     global fig1
+    global cursor1
+    global plot1
+    global t1
+    global dedo1
+    global dedo2
+    global cursor2
     global fig2
+    global plot2
+    global t2
+    global dedo1_seg
+    global dedo2_seg
+    global cursor3
+    global cursor4
     global fig3
+    global cursor5
+    global cursor6
     global fig4
+    global cursor7
+    global cursor8
     mov = movimiento.get()
     if mov == 'Golpeteo de dedos':
         mov_eval = 'fingertap'
@@ -239,14 +254,18 @@ def procesar_video(nombre_csv):
     fig1.tight_layout()
 
     canvasf = FigureCanvasTkAgg(fig1, master=tab2)
+    toolbar1 = NavigationToolbar2Tk(canvasf, tab2)
     canvasf.draw()
+    toolbar1.place(x=160.0, y=540.0)
     canvasf.get_tk_widget().place(x=80.0, y=145.0)
+    toolbar1.update()
     # x=80, y=145
+
 
     fig2 = Figure(figsize=(5, 4), dpi=100)
     plot2 = fig2.add_subplot(111)
-    plot2.plot(t2, dedo1_seg)
-    plot2.plot(t2, dedo2_seg)
+    plot2.plot(t2, dedo1_seg, visible='False')
+    plot2.plot(t2, dedo2_seg, visible='False')
     plot2.set_xlabel('Tiempo (s)')
     plot2.set_ylabel('Amplitud')
     if mov == 'Golpeteo de dedos':
@@ -258,7 +277,10 @@ def procesar_video(nombre_csv):
     elif mov == 'Cierre de puño':
         plot2.set_title('Fist open-close en y - segmentada')
         plot2.legend(['Pulgar', 'Meñique'], loc='upper right')
-    fig2.tight_layout()
+
+    canvasf = FigureCanvasTkAgg(fig2, master=tab2)
+    canvasf.draw()
+
 
     # x=80, y=145
 
@@ -266,6 +288,10 @@ def procesar_video(nombre_csv):
     plot3 = fig3.add_subplot(111)
     plot3.plot(t3, dedo1_vel)
     plot3.plot(t3, dedo2_vel)
+    cursor5 = SnaptoCursor(plot3, t3, dedo1_vel, "crimson")
+    fig3.canvas.mpl_connect('motion_notify_event', cursor5.mouse_move)
+    cursor6 = SnaptoCursor(plot3, t3, dedo2_vel, "blue")
+    fig3.canvas.mpl_connect('motion_notify_event', cursor6.mouse_move)
     plot3.set_xlabel('Tiempo (s)')
     plot3.set_ylabel('Velocidad')
     if mov == 'Golpeteo de dedos':
@@ -281,8 +307,13 @@ def procesar_video(nombre_csv):
 
     canvasf = FigureCanvasTkAgg(fig3, master=tab2)
     canvasf.draw()
+    toolbar3 = NavigationToolbar2Tk(canvasf,
+                                    tab2)
+    toolbar3.update()
+    toolbar3.place(x=770.0, y=540.0)
     canvasf.get_tk_widget().place(x=690.0, y=145.0)
     # x=680, y=145
+
 
     fig4 = Figure(figsize=(5, 4), dpi=100)
     plot4 = fig4.add_subplot(111)
@@ -290,6 +321,10 @@ def procesar_video(nombre_csv):
     plot4.plot(t_amp, amp_trend1, color='tab:blue', linestyle=':')
     plot4.plot(t_amp, mov_amp2, color='tab:orange')
     plot4.plot(t_amp, amp_trend2, color='tab:orange', linestyle=':')
+    cursor7 = SnaptoCursor(plot4, t_amp, mov_amp1, "crimson")
+    fig4.canvas.mpl_connect('motion_notify_event', cursor7.mouse_move)
+    cursor8 = SnaptoCursor(plot4, t_amp, mov_amp2, "blue")
+    fig4.canvas.mpl_connect('motion_notify_event', cursor8.mouse_move)
     plot4.set_title("Tendencias de amplitud de las señales - " + mov)
     plot4.set_xlabel('Tiempo(s)')
     plot4.set_ylabel('Amplitud')
@@ -303,16 +338,56 @@ def procesar_video(nombre_csv):
     fig4.tight_layout()
 
 
+def cursor_graph1():
+    global banderas
+    global cursor1
+    global cursor2
+    global cursor3
+    global cursor4
+    global cid1
+    global cid2
+    global cid3
+    global cid4
+    banderas = not banderas
+    if banderas:
+        cursor1 = SnaptoCursor(plot1, t1, dedo1, "crimson")
+        cid1 = fig1.canvas.mpl_connect('motion_notify_event', cursor1.mouse_move)
+        cursor2 = SnaptoCursor(plot1, t1, dedo2, "blue")
+        cid2 = fig1.canvas.mpl_connect('motion_notify_event', cursor2.mouse_move)
+        cursor3 = SnaptoCursor(plot2, t2, dedo1_seg, "crimson")
+        cid3 = fig2.canvas.mpl_connect('motion_notify_event', cursor3.mouse_move)
+        cursor4 = SnaptoCursor(plot2, t2, dedo2_seg, "blue")
+        cid4 = fig2.canvas.mpl_connect('motion_notify_event', cursor4.mouse_move)
+    else:
+        fig1.canvas.mpl_disconnect(cid1)
+        fig1.canvas.mpl_disconnect(cid2)
+        fig2.canvas.mpl_disconnect(cid3)
+        fig2.canvas.mpl_disconnect(cid4)
+        cursor1.delete_cursor()
+        cursor2.delete_cursor()
+        cursor3.delete_cursor()
+        cursor4.delete_cursor()
+
+
+
 def toggle1():
     global toggle1_btn
+    global plot1
+    global i
     if toggle1_btn:
         canvasf = FigureCanvasTkAgg(fig2, master=tab2)
-        canvasf.draw()
         canvasf.get_tk_widget().place(x=80.0, y=145.0)
+        toolbar2 = NavigationToolbar2Tk(canvasf, tab2)
+        toolbar2.update()
+        toolbar2.place(x=160.0, y=540.0)
+        fig2.tight_layout()
     else:
         canvasf = FigureCanvasTkAgg(fig1, master=tab2)
-        canvasf.draw()
         canvasf.get_tk_widget().place(x=80.0, y=145.0)
+        toolbar1 = NavigationToolbar2Tk(canvasf, tab2)
+        toolbar1.place(x=160.0, y=540.0)
+        toolbar1.update()
+        fig1.tight_layout()
     toggle1_btn = not toggle1_btn
 
 
@@ -322,11 +397,22 @@ def toggle2():
         canvasf = FigureCanvasTkAgg(fig4, master=tab2)
         canvasf.draw()
         canvasf.get_tk_widget().place(x=690.0, y=145.0)
+        toolbar4 = NavigationToolbar2Tk(canvasf,
+                                        tab2)
+        toolbar4.update()
+        toolbar4.place(x=770.0, y=540.0)
+
     else:
         canvasf = FigureCanvasTkAgg(fig3, master=tab2)
         canvasf.draw()
         canvasf.get_tk_widget().place(x=690.0, y=145.0)
+        toolbar3 = NavigationToolbar2Tk(canvasf,
+                                        tab2)
+        toolbar3.update()
+        toolbar3.place(x=770.0, y=540.0)
     toggle2_btn = not toggle2_btn
+
+
 
 
 nombre_csv = None
@@ -334,6 +420,9 @@ toggle1_btn = True
 toggle2_btn = True
 cap = None
 video_name = None
+img=None
+posicion = 0
+banderas = False
 fig1 = None
 fig2 = None
 fig3 = None
@@ -455,14 +544,23 @@ graph1_btn = tk.Button(tab2, image=button_image_graph1,
                        highlightthickness=0,
                        command=lambda: toggle1(),
                        relief="flat")
-graph1_btn.place(x=395.0, y=574.0, width=206.0, height=47.0)
+graph1_btn.place(x=395.0, y=600.0, width=206.0, height=47.0)
 
 graph2_btn = tk.Button(tab2, image=button_image_graph2,
                        borderwidth=0,
                        highlightthickness=0,
                        command=lambda: toggle2(),
                        relief="flat")
-graph2_btn.place(x=1020.0, y=574.0, width=206.0, height=47.0)
+graph2_btn.place(x=1020.0, y=600.0, width=206.0, height=47.0)
+
+cursor_graph1_btn = tk.Button(tab2, text='Cursor',
+                       borderwidth=0,
+                       highlightthickness=0,
+                       command=lambda: cursor_graph1(),
+                       relief="flat")
+cursor_graph1_btn.place(x=100, y=600.0, width=206.0, height=47.0)
+
+
 
 #Recuadros blancos para ver gráficas
 image_image_1 = PhotoImage(file=relative_to_assets("image_1.png"))

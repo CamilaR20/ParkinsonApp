@@ -56,7 +56,7 @@ class Parkinson_movements:
         # PADDING
         self.mov_pad = np.pad(self.mov, ((6, 6), (0, 0)), 'symmetric')
 
-    def filtered_signal(self):
+    def filter_signal(self):
         # HIGH PASS FILTER
         SOS = [[1, -2, 1, 1, -1.9446, 0.9530], [1, -2, 1, 1, -1.8686, 0.8767], [1, -2, 1, 1, -1.8273, 0.8353]]
         G = np.array([[0.9744], [0.9363], [0.9157], [1]])
@@ -81,7 +81,7 @@ class Parkinson_movements:
         # SPEED CALCULATED AS DERIVATIVE
         self.speed = np.diff(self.mov_cut, axis=0)
 
-    def periodicidad(self):
+    def calc_periods(self):
         # MOVEMENT PERIODICITY
         periods = periods_mov(self.t1, self.idx_max)
         plt.figure()

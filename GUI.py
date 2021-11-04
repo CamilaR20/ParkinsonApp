@@ -55,7 +55,7 @@ class Tab1(ttk.Frame):
         self.csv_path = ''
 
         # Assets
-        self.entry_img = tk.PhotoImage(file="/Users/santiagorojasjaramillo/PycharmProjects/ParkinsonVideoApp/assets/entry.png")
+        self.entry_img = tk.PhotoImage(file=relative_to_assets("entry.png"))
         self.btn_search_img = tk.PhotoImage(file=relative_to_assets("btn_search.png"))
         self.bg_dropdown_img = tk.PhotoImage(file=relative_to_assets("bg_dropdown.png"))
         self.btn_process_img = tk.PhotoImage(file=relative_to_assets("btn_process.png"))
@@ -98,7 +98,7 @@ class Tab1(ttk.Frame):
                                relief="flat")
         search_btn.place(x=383.0, y=225.0, width=137.0, height=47.0)
 
-        # Seleccionar: rectangle background, 3 dropdown lists, process video button
+        # Seleccionar: rectangle background, 3 dropdowns, process video button, UPDRS classification (btn and dropdown)
         self.canvas.create_text(55.0, 320.0, anchor="nw", text="Seleccionar video", fill="#FFFFFF",
                                 font=("Roboto Bold", 24 * -1))
         self.canvas.create_image(286.0, 480.0, image=self.bg_dropdown_img)
@@ -125,7 +125,7 @@ class Tab1(ttk.Frame):
         process_btn.place(x=80.0, y=620.0, width=200.0, height=47.0)
 
         self.updrs_btn = tk.Button(self, text="Clasicación UPDRS", borderwidth=0, highlightthickness=0,
-                                command=self.updrs_clasificacion, relief="flat", state=tk.DISABLED)
+                                   command=self.updrs_clasification, relief="flat", state=tk.DISABLED)
         self.updrs_btn.place(x=320.0, y=620.0, width=200.0, height=47.0)
 
         # Process Label
@@ -184,9 +184,17 @@ class Tab1(ttk.Frame):
         download_folder = self.folder_var.get()
         pID = self.patientID_var.get()
         test = self.test_var.get()
+
+        # Check all fields have values
+        if(download_folder == "Carpeta no seleccionada" or download_folder == ""):
+            messagebox.showinfo(message="Debe seleccionar una carpeta de descarga.", title="Seleccionar Carpeta")
+            return
         if ('Seleccione' in (test or self.hand_var.get() or self.movement_var.get())):
             self.process_var.set("Debe seleccionar una opción en todos los campos.")
             return
+
+        self.process_var.set("Procesando...")
+
         # Download test files from firebase, but first check if folder already exists
         folder_path = pID + '/' + test
         if not os.path.isdir(download_folder + '/' + pID):
@@ -219,13 +227,12 @@ class Tab1(ttk.Frame):
         self.video_fps = self.video_cap.get(cv2.CAP_PROP_FPS)
         self.video_ts = int((1 / self.video_fps) * 1000)
 
-        self.process_var.set("Procesando...")
         self.vid_first_frame()
         self.updrs_btn['state'] = tk.NORMAL
 
         self.get_trajectory(video_path)
 
-    def updrs_clasificacion(self):
+    def updrs_clasification(self):
         escala = self.updrs_var.get()
         xlsx_folder = self.folder_var.get()
         pID = self.patientID_var.get()
@@ -410,7 +417,7 @@ class Tab2(ttk.Frame):
         mov = tab1.movement_var.get()
 
         video_features = Parkinson_movements(csv_path, mov_eval, fps)
-        video_features.filtered_signal()
+        video_features.filter_signal()
         video_features.calc_speed()
 
         self.t_amp, self.mov_amp1, self.amp_trend1, self.mov_amp2, self.amp_trend2 = video_features.calc_amplitude()
@@ -596,9 +603,10 @@ def get_moveval(mov, hand):
 if __name__ == '__main__':
     # Define global variables
     ASSETS_PATH = Path(__file__).parent / Path("./assets")
+    CREDS_PATH = Path(__file__).parent / Path("./serviceAccountKey.json")
 
     # Connect to FireBase
-    cred = credentials.Certificate('/Users/santiagorojasjaramillo/Desktop/serviceAccountKey.json')
+    cred = credentials.Certificate(CREDS_PATH)
     firebase_admin.initialize_app(cred, {'storageBucket': 'parkinsondata.appspot.com'})
     bucket = storage.bucket()
 

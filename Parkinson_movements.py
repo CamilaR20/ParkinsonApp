@@ -7,8 +7,6 @@ from extraccion import *
 
 class Parkinson_movements:
     def __init__(self, filename, movement):
-        #mov_num = '07l'
-        #filename = ('./mov_csv/fingertap_' + mov_num + '.csv')
         self.movement = movement
         self.mov = genfromtxt(filename, delimiter=',')
 

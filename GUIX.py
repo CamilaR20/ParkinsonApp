@@ -12,7 +12,6 @@ from tkinter import ttk
 from zipfile import ZipFile
 from tkinter import filedialog
 from tkinter import Label
-from tkvideo import tkvideo
 from Parkinson_movements import *
 from pathlib import Path
 from matplotlib.figure import Figure
@@ -24,7 +23,7 @@ from PIL import ImageTk
 
 
 
-cred = credentials.Certificate('/Users/santiagorojasjaramillo/Desktop/serviceAccountKey.json')
+cred = credentials.Certificate('/Users/camilaroa/PycharmProjects/parkinsonApp/serviceAccountKey.json')
 firebase_admin.initialize_app(cred, {'storageBucket': 'parkinsondata.appspot.com'})
 
 OUTPUT_PATH = Path(__file__).parent
@@ -154,7 +153,7 @@ def adquirir_video():
             mov_eval = 'fist_l'
 
     #video_name = download_folder + '/temp/' + mov_eval + '.mp4'
-    video_name = '/Users/santiagorojasjaramillo/Desktop/Prueba_1234/' + mov_eval + '.mp4'
+    video_name = '/Users/camilaroa/Desktop/mytest/1234/26-09-2021, 16:55, OFF/fingertap_l.mp4'
     show_first_frame()
     archivo_csv(video_name, download_folder, mov_eval, dat)
 
@@ -428,9 +427,10 @@ fig2 = None
 fig3 = None
 fig4 = None
 
+# GUI
 root = tk.Tk()
-root.title("ParkinsonApp GUI")
-# setting the windows size
+root.title("ParkinsonApp")
+# setting the window's size
 root.geometry("1340x820")
 root.configure(bg="#3A7FF6")
 
@@ -469,6 +469,8 @@ canvas.create_text(903.0, 25.0, anchor="nw", text="Video", fill="#000000", font=
 canvas.create_text(55.0, 80.0, anchor="nw", text="Carpeta de descarga", fill="#FFFFFF", font=("Roboto", 24 * -1))
 entry_image_folder = PhotoImage(file=relative_to_assets("entry_2.png"))
 entry_bg_2 = canvas.create_image(210.0, 140, image=entry_image_folder)
+
+# FOLDER PLACEHOLDER
 folder_id = canvas.create_text(60.0, 127.0, anchor="nw", text="Carpeta no seleccionada", fill="#636363",
                                font=("Roboto", 18 * -1), width=270)
 

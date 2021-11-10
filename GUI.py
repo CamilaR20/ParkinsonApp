@@ -162,6 +162,7 @@ class Tab1(ttk.Frame):
         self.movement_var.set("Seleccione movimiento")
         self.test_var.set("Seleccione fecha")
         self.updrs_var.set("UPDRS")
+        self.process_var.set("")
 
         # Get test names for patient ID
         test_list = []
@@ -190,13 +191,15 @@ class Tab1(ttk.Frame):
             messagebox.showinfo(message="Debe seleccionar una carpeta de descarga.", title="Seleccionar Carpeta")
             return
         if ('Seleccione' in (test or self.hand_var.get() or self.movement_var.get())):
-            self.process_var.set("Debe seleccionar una opción en todos los campos.")
+            messagebox.showinfo(message="Debe seleccionar una opción en todos los campos.", title="Seleccionar opciones")
             return
 
         self.process_var.set("Procesando...")
 
         # Download test files from firebase, but first check if folder already exists
         folder_path = pID + '/' + test
+        folder_path = folder_path.replace(':', '-')
+
         if not os.path.isdir(download_folder + '/' + pID):
             os.mkdir(download_folder + '/' + pID)
         if not os.path.isdir(download_folder + '/' + folder_path):
@@ -265,7 +268,7 @@ class Tab1(ttk.Frame):
                         return
                     else:
                         choice = messagebox.askyesno(message="Esta prueba ya fue evaluada con una escala"
-                                                    "diferente. ¿Desea cambiar evaluación?", title="Prueba ya evaluada")
+                                                    " diferente. ¿Desea cambiar evaluación?", title="Prueba ya evaluada")
                         if choice:
                             ws.delete_rows(filas_eliminadas, 1)
                             ws.append([str(pID), self.mov_eval, hand, test, escala])

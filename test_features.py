@@ -80,9 +80,9 @@ def plot_localmax(t, idx_max, mov, movement):
 
 
 if __name__ == '__main__':
-    main_path = '/Users/camilaroa/Desktop/mytest/0008/21-10-2021, 09:18, OFF'
-    video_path = os.path.join(main_path, 'fingertap_r.mp4')
-    csv_path = os.path.join(main_path, 'fingertap_r.csv')
+    main_path = '/Users/santiagorojasjaramillo/Desktop/ParkinsonVideos/0004/07-10-2021, 09:47, ON'
+    video_path = os.path.join(main_path, 'fist_l.mp4')
+    csv_path = os.path.join(main_path, 'fist_l.csv')
     movement = 'fingertap'
     fps = 30
 
@@ -94,7 +94,9 @@ if __name__ == '__main__':
     plot_mov(video_features.t0, video_features.mov, movement, 'señal original')
     plot_mov(video_features.t0, video_features.mov_filt[7:-5], movement, ' filtro pasa-altas')
     plot_mov(video_features.t0, video_features.mov_filter, movement, 'filtro pasa-bandas')
+    plot_mov(video_features.t1, video_features.mov_cut, movement, 'Señal segmentada')
     plot_localmax(video_features.t1, video_features.idx_max, video_features.mov_cut, movement)
+
 
     # video_features.calc_speed()
     # video_features.calc_periods()

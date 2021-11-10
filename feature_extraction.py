@@ -197,15 +197,16 @@ def mov_localmax(t, mov, f_max, movement, show):
     for i in range(mov.shape[1]):
         # Find peaks idx for each column (finger trajectory in an axis)
         peaks, properties = signal.find_peaks(mov[:, i], distance=min_sep, height=0, prominence=0)
-        prominences = properties["prominences"]
+        #prominences = properties["prominences"]
         n_peaks = len(peaks)
-        if n_peaks != 0:
-            if n_peaks > 10:
-                # Take the 10 peaks with higher prominence
-                sorted_peaks = [peak for _, peak in sorted(zip(prominences, peaks), reverse=True)]
-                idx_max[sorted_peaks[0:10], i] = True
-            else:
-                idx_max[peaks, i] = True
+        idx_max[peaks[0:10], i] = True
+        # if n_peaks != 0:
+        #     if n_peaks > 10:
+        #         # Take the 10 peaks with higher prominence
+        #         sorted_peaks = [peak for _, peak in sorted(zip(prominences, peaks), reverse=True)]
+        #         idx_max[sorted_peaks[0:10], i] = True
+        #     else:
+        #         idx_max[peaks, i] = True
     if show:
         if movement == 'fingertap':
             plt.figure()

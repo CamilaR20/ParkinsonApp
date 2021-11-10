@@ -26,7 +26,7 @@ def fft_mov(mov, show):
         plt.ylabel('Articulación')
         plt.title('FFT - eje x')
         plt.yticks(np.arange(0, 21, dtype=np.int))
-        # plt.show()
+        plt.show()
 
         plt.figure()
         plt.imshow(np.transpose(abs(fft1[:, 21:])), extent=[0, 15, 20, 0], cmap='jet', aspect='auto')
@@ -35,7 +35,7 @@ def fft_mov(mov, show):
         plt.ylabel('Articulación')
         plt.title('FFT - eje y')
         plt.yticks(np.arange(0, 21, dtype=np.int))
-        # plt.show()
+        plt.show()
 
     return abs(fft1), xf
 
@@ -187,7 +187,7 @@ def plot_mov(t, mov, movement, title):
         plt.ylabel('Amplitud')
         plt.title('Finger tapping en y - ' + title)
         plt.legend(['Pulgar', 'Índice'], loc='upper right')
-        #plt.show()
+        plt.show()
     elif movement == 'pronosup':
         plt.figure()
         plt.plot(t, mov[:, 4])  # Thumb in x

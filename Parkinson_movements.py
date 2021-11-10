@@ -1,8 +1,6 @@
-import scipy as sp
+
 from numpy import genfromtxt
 from scipy import signal
-import matplotlib.pyplot as plt
-import numpy as np
 from extraccion import *
 
 class Parkinson_movements:
@@ -51,6 +49,7 @@ class Parkinson_movements:
     def calc_speed(self):
         # SPEED CALCULATED AS DERIVATIVE
         self.speed = np.diff(self.mov_cut, axis=0)
+        plot_mov(self.t1[1:], self.speed, self.movement, 'velocidad')  # Plot speed as derivative
 
     def periodicidad(self):
         # MOVEMENT PERIODICITY
@@ -60,6 +59,7 @@ class Parkinson_movements:
         plt.title("Mediana y distribución de la periodicidad - fingertap")
         plt.xticks([1, 2], ['Pulgar', 'Índice'])
         plt.ylabel('Distribución')
+        plt.show()
 
     def calc_fft(self):
         #FFT
@@ -122,4 +122,4 @@ class Parkinson_movements:
 
         # plot_mov(self.t0, self.mov, self.movement, 'Original')  # Plot original signal
         # plot_mov(self.t1, self.mov_cut, self.movement, 'segmentada') #Plot signal segmentada
-        # plot_mov(self.t1[1:], self.speed, self.movement, 'velocidad') #Plot speed as derivative
+

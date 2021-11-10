@@ -6,6 +6,8 @@ import imutils
 import mediapipe as mp
 import csv
 import os
+from openpyxl import Workbook
+from openpyxl import load_workbook
 from firebase_admin import credentials
 from firebase_admin import storage
 from tkinter import ttk
@@ -158,6 +160,47 @@ def adquirir_video():
     archivo_csv(video_name, download_folder, mov_eval, dat)
 
 
+def write_class():
+    global clasificacion
+    global mov
+    global download_folder
+    escala = clasificacion.get()
+    if mano.get() == 'Derecha':
+        if movimiento.get() == 'Golpeteo de dedos':
+            mov_eval = 'fingertap_r'
+        elif movimiento.get() == 'Prono supinacion':
+            mov_eval = 'pronosup_r'
+        elif movimiento.get() == 'Cierre de puño':
+            mov_eval = 'fist_r'
+    elif mano.get() == 'Izquierda':
+        if movimiento.get() == 'Golpeteo de dedos':
+            mov_eval = 'fingertap_l'
+        elif movimiento.get() == 'Prono supinacion':
+            mov_eval = 'pronosup_l'
+        elif movimiento.get() == 'Cierre de puño':
+            mov_eval = 'fist_l'
+
+    nombre_xlsx = download_folder+"/ClasificacionVideos.xlsx"
+    if not os.path.exists(nombre_xlsx):
+        wb = Workbook()
+    # grab the active worksheet
+        ws = wb.active
+        ws['A1'] = 'ID del paciente'
+        ws['B1'] = 'Movimiento evaluado'
+        ws['C1'] = 'Fecha de la prueba'
+        ws['D1'] = 'Clasificación UPDRS'
+    # Rows can also be appended
+        ws.append([str(patient_id.get()), mov_eval, fecha.get(), escala])
+    # Save the file
+        wb.save(nombre_xlsx)
+    else:
+        wb = load_workbook(nombre_xlsx)
+        ws = wb.active
+        # Rows can also be appended
+        ws.append([str(patient_id.get()), mov_eval, fecha.get(), escala])
+        wb.save(nombre_xlsx)
+
+
 def archivo_csv(name_video, folder_download, mov_eval, dat):
     global nombre_csv
     carpeta_csv = folder_download + '/mov_csv/'
@@ -214,6 +257,7 @@ def procesar_video(nombre_csv):
     global fig4
     global cursor7
     global cursor8
+    global toolbar1
     mov = movimiento.get()
     if mov == 'Golpeteo de dedos':
         mov_eval = 'fingertap'
@@ -254,10 +298,10 @@ def procesar_video(nombre_csv):
 
     canvasf = FigureCanvasTkAgg(fig1, master=tab2)
     toolbar1 = NavigationToolbar2Tk(canvasf, tab2)
-    canvasf.draw()
-    toolbar1.place(x=160.0, y=540.0)
-    canvasf.get_tk_widget().place(x=80.0, y=145.0)
     toolbar1.update()
+    toolbar1.place(x=160.0, y=540.0)
+    canvasf.draw()
+    canvasf.get_tk_widget().place(x=80.0, y=145.0)
     # x=80, y=145
 
 
@@ -368,9 +412,9 @@ def cursor_graph1():
         cursor4.delete_cursor()
 
 
-
 def toggle1():
     global toggle1_btn
+    global toolbar2
     global plot1
     global i
     if toggle1_btn:
@@ -412,20 +456,19 @@ def toggle2():
     toggle2_btn = not toggle2_btn
 
 
-
-
 nombre_csv = None
 toggle1_btn = True
 toggle2_btn = True
 cap = None
 video_name = None
 img=None
-posicion = 0
 banderas = False
 fig1 = None
 fig2 = None
 fig3 = None
 fig4 = None
+toolbar1 = None
+clasificacion = 0
 
 # GUI
 root = tk.Tk()
@@ -447,6 +490,8 @@ mano = tk.StringVar()
 mano.set("Seleccione mano")
 fecha = tk.StringVar(root)
 fecha.set("Seleccione fecha")
+clasificacion = tk.IntVar()
+clasificacion.set("Seleccione nivel UPDRS")
 
 
 canvas = Canvas(tab1, bg="#3A7FF6", height=720, width=1280, bd=0, highlightthickness=0, relief="ridge")
@@ -506,7 +551,15 @@ video_btn = tk.Button(tab1, image=button_image_video,
                       highlightthickness=0,
                       command=adquirir_video,
                       relief="flat")
-video_btn.place(x=220.0, y=620.0, width=200.0, height=47.0)
+video_btn.place(x=180.0, y=620.0, width=200.0, height=47.0)
+
+# Boton para escribir excel con clasificacion UPDRS
+class_btn = tk.Button(tab1, text = "Clasificar",
+                      borderwidth=0,
+                      highlightthickness=0,
+                      command=write_class,
+                      relief="flat")
+class_btn.place(x=400.0, y=620.0, width=200.0, height=47.0)
 
 iniciar_btn = tk.Button(tab1, text='Iniciar', command=btn_iniciar)
 iniciar_btn.place(x=725.0, y=670.0, width=200.0, height=47.0)
@@ -519,10 +572,12 @@ dates_list = ['No hay fechas disponibles']
 hand_entry = OptionMenu(tab1, mano, "Derecha", "Izquierda")
 movement_entry = OptionMenu(tab1, movimiento, "Golpeteo de dedos", "Prono supinacion", "Cierre de puño")
 date_entry = tk.OptionMenu(tab1, fecha, *dates_list)
+class_entry = tk.OptionMenu(tab1, clasificacion, '0', '1', '2', '3', '4')
 
 hand_entry.place(x=220.0, y=390.0, width=200.0, height=47.0)
 movement_entry.place(x=220.0, y=430.0, width=200.0, height=47.0)
 date_entry.place(x=220.0, y=470.0, width=200.0, height=47.0)
+class_entry.place(x=220.0, y=510.0, width=200.0, height=47.0)
 
 
 tab2 = ttk.Frame(tabControl)
@@ -561,8 +616,6 @@ cursor_graph1_btn = tk.Button(tab2, text='Cursor',
                        command=lambda: cursor_graph1(),
                        relief="flat")
 cursor_graph1_btn.place(x=100, y=600.0, width=206.0, height=47.0)
-
-
 
 #Recuadros blancos para ver gráficas
 image_image_1 = PhotoImage(file=relative_to_assets("image_1.png"))

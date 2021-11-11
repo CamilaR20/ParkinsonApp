@@ -318,7 +318,7 @@ class Tab1(ttk.Frame):
             self.video_label.config(image=img)
             self.video_label.image = img
             if not self.video_pause:
-                self.video_label.after(self.video_ts, self.vid_reproduce)
+                self.video_label.after(1, self.vid_reproduce)
         else:
             # self.video_pos = 0
             self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)

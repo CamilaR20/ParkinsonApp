@@ -56,18 +56,5 @@ exe = EXE(pyz,
 # For MacOS, comment on windows
 app = BUNDLE(exe,
          name='ParkinsonApp.app',
-         icon='appIcon.icns',
-         bundle_identifier='com.cands',
-         info_plist={
-            'NSPrincipalClass': 'NSApplication',
-            'NSAppleScriptEnabled': False,
-            'CFBundleDocumentTypes': [
-                {
-                    'CFBundleTypeName': 'None',
-                    'CFBundleTypeIconFile': 'appIcon.icns',
-                    'LSItemContentTypes': [],
-                    'LSHandlerRank': 'Owner'
-                    }
-                ]
-            },
-         )
+         icon='./assets/appIcon.icns',
+         bundle_identifier=None)

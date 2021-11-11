@@ -28,6 +28,10 @@ a = Analysis(['GUI.py'],
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
+mediapipe_tree = Tree(get_mediapipe_path(), prefix='mediapipe', excludes=["*.pyc"])
+a.datas += mediapipe_tree
+a.binaries = filter(lambda x: 'mediapipe' not in x[0], a.binaries)
+
 # Change icon extension to ico for Windows
 exe = EXE(pyz,
           a.scripts,
@@ -51,6 +55,19 @@ exe = EXE(pyz,
 
 # For MacOS, comment on windows
 app = BUNDLE(exe,
-             name='ParkinsonApp.app',
-             icon='./assets/appIcon.icns',
-             bundle_identifier='com.camilaroa')
+         name='ParkinsonApp.app',
+         icon='appIcon.icns',
+         bundle_identifier='com.cands',
+         info_plist={
+            'NSPrincipalClass': 'NSApplication',
+            'NSAppleScriptEnabled': False,
+            'CFBundleDocumentTypes': [
+                {
+                    'CFBundleTypeName': 'None',
+                    'CFBundleTypeIconFile': 'appIcon.icns',
+                    'LSItemContentTypes': [],
+                    'LSHandlerRank': 'Owner'
+                    }
+                ]
+            },
+         )

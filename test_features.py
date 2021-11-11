@@ -80,14 +80,17 @@ def plot_localmax(t, idx_max, mov, movement):
 
 
 if __name__ == '__main__':
-    main_path = '/Users/santiagorojasjaramillo/Desktop/ParkinsonVideos/0004/07-10-2021, 09:47, ON'
-    video_path = os.path.join(main_path, 'fist_l.mp4')
-    csv_path = os.path.join(main_path, 'fist_l.csv')
+    main_path = '/Users/camilaroa/Downloads/ParkinsonVideos/0004/07-10-2021, 09:47, ON'
     movement = 'fingertap'
+    finger = 'l'
+    video_path = os.path.join(main_path, movement + '_' + finger + '.mp4')
+    csv_path = os.path.join(main_path, movement + '_' + finger + '.csv')
     fps = 30
 
     if not os.path.isfile(csv_path):
-        get_trajectory(csv_path, video_path)
+        fps = get_trajectory(csv_path, video_path)
+
+    print(fps)
 
     video_features = Parkinson_movements(csv_path, movement, fps)
     video_features.filter_signal()

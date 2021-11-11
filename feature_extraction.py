@@ -23,6 +23,7 @@ def get_trajectory(csv_path, video_path):
                 results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
                 # REVISAR QUE DEBE HACER SI NO ENCUENTRA MANO
                 if not results.multi_hand_landmarks:
+                    frame += 1
                     continue
                 row = [float(frame) / fps]
                 for finger in results.multi_hand_landmarks[0].landmark:
@@ -33,6 +34,8 @@ def get_trajectory(csv_path, video_path):
                     f_writer = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                     f_writer.writerow(row)
             frame += 1
+
+    return fps
 
 
 class Parkinson_movements:
@@ -51,7 +54,7 @@ class Parkinson_movements:
 
         # Drop Z and separate time vector
         self.t0 = mov[:, 0]
-        self.mov = np.delete(self.mov, 0, axis=1)
+        self.mov = np.delete(mov, 0, axis=1)
 
         # PADDING
         self.mov_pad = np.pad(self.mov, ((6, 6), (0, 0)), 'symmetric')
@@ -64,7 +67,8 @@ class Parkinson_movements:
         # plot_mov(t, mov_filt[7:-5], movement, ' filtro pasa-altas')
 
         # BAND PASS FILTER
-        f_max = mov_freq(self.mov_filt)  # Main frequency of signal
+        f_max = mov_freq(self.mov_filt, self.fs, self.movement)  # Main frequency of signal
+        print(f_max)
         f_min = max(0.0001, f_max - 1)
         Num = signal.firwin(9, [2 * (f_min) / self.fs, 2 * (f_max + 1) / self.fs],
                             pass_zero='bandpass')  # Design FIR filter
@@ -74,7 +78,7 @@ class Parkinson_movements:
         # plot_mov(t, mov_filter, movement, 'filtro pasa-bandas')
 
         # LOCAL MAXIMA
-        idx_max = mov_localmax(self.t0, self.mov_filter, f_max, self.movement, False)
+        idx_max = mov_localmax(self.t0, self.mov_filter, f_max, self.fs, self.movement, False)
         self.t1, self.mov_cut, self.idx_max = cut_mov(self.t0, self.mov_filter, idx_max, self.movement)
 
     def calc_speed(self):
@@ -89,7 +93,7 @@ class Parkinson_movements:
 
     def calc_fft(self):
         # FFT
-        self.mov_fft, self.freq = fft_mov(self.mov_cut, True)
+        self.mov_fft, self.freq = fft_mov(self.mov_cut, self.fs, True)
 
     def calc_amplitude(self):
         # AMPLITUDE TREND
@@ -150,9 +154,8 @@ class Parkinson_movements:
         # plot_mov(self.t1, self.mov_cut, self.movement, 'segmentada') #Plot signal segmentada
 
 
-def fft_mov(mov, show):
+def fft_mov(mov, fs, show):
     mov_rows = len(mov)
-    fs = 30
     fft2 = fft(mov, axis=0) / mov_rows
     fft1 = fft2[:(mov_rows // 2), :]
     fft1[1:-1, :] = 2 * fft1[1:- 1, :]
@@ -185,14 +188,26 @@ def fft_mov(mov, show):
     return abs(fft1), xf
 
 
-def mov_freq(mov):
-    [mov_fft, freq] = fft_mov(mov, False)
-    f_max = freq[np.argmax(mov_fft[:, 29])]
+def mov_freq(mov, fs, movement):
+    if movement == 'pronosup':
+        finger = 4  # Pulgar en x
+    elif movement == 'fingertap':
+        finger = 29  # Pulgar en y (Indice en y no es detectado bien en todos los casos por mediapipe)
+    else:
+        finger = 29 # Indice en y
+
+    [mov_fft, freq] = fft_mov(mov, fs, False)
+    f_max = freq[np.argmax(mov_fft[:, finger])]
     return f_max
 
 
-def mov_localmax(t, mov, f_max, movement, show):
-    min_sep = 30 // f_max - 5
+def mov_localmax(t, mov, f_max, fps, movement, show):
+    if f_max < 0.9:
+        min_sep = max(fps // (1.5*f_max), 4)
+    else:
+        min_sep = max(fps // f_max - 5, 4)
+    print(fps // f_max - 5)
+    print(min_sep)
     idx_max = np.full(mov.shape, False)  # Logical array to store max locations
     for i in range(mov.shape[1]):
         # Find peaks idx for each column (finger trajectory in an axis)
@@ -251,8 +266,10 @@ def cut_mov(t, mov, idx_max, movement):
     # Segment signal: first index is 7 samples before the first max and last index is 7 samples after last max
     if movement == 'pronosup':
         finger = 4  # Pulgar en x
-    else:
+    elif movement == 'fingertap':
         finger = 29  # Indice en y
+    else:
+        finger = 29 # Indice en y
 
     first_max = np.where(idx_max[:, finger])[0][0]
     no = int(max([first_max - 7, 0]))

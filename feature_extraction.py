@@ -70,9 +70,9 @@ class Parkinson_movements:
         f_max = mov_freq(self.mov_filt, self.fs, self.movement)  # Main frequency of signal
         print(f_max)
         f_min = max(0.0001, f_max - 1)
-        Num = signal.firwin(9, [2 * (f_min) / self.fs, 2 * (f_max + 1) / self.fs],
+        Num = signal.firwin(15, [2 * (f_min) / self.fs, 2 * (f_max + 1) / self.fs],
                             pass_zero='bandpass')  # Design FIR filter
-        # fir_freqz(Num, Fs)
+        fir_freqz(Num, self.fs)
         mov_filter = sp.signal.filtfilt(Num, 1, self.mov_filt, axis=0, padtype=None, padlen=None, irlen=None)
         self.mov_filter = mov_filter[7:-5, :]  # Remove padding
         # plot_mov(t, mov_filter, movement, 'filtro pasa-bandas')
@@ -338,3 +338,19 @@ def detrend_mov(mov, t, movement, show):
             plt.legend(['Pulgar', "Tendencia pulgar", 'Meñique', "Tendencia meñique"], loc='upper right')
             # plt.show()
     return amp_trend
+
+
+def fir_freqz(num, fs):
+    w, h = signal.freqz(num, 1, fs=fs)
+    fig, ax1 = plt.subplots()
+    ax1.set_title('Digital filter frequency response')
+    ax1.plot(w, 20 * np.log10(abs(h)), 'b')
+    ax1.set_ylabel('Amplitude [dB]', color='b')
+    ax1.set_xlabel('Frequency [rad/sample]')
+    ax2 = ax1.twinx()
+    angles = np.unwrap(np.angle(h))
+    ax2.plot(w, angles, 'g')
+    ax2.set_ylabel('Angle (radians)', color='g')
+    ax2.grid()
+    ax2.axis('tight')
+    #plt.show()

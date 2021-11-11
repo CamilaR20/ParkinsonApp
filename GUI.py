@@ -25,7 +25,7 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("ParkinsonApp")
-        self.geometry("1340x800")  # setting the window's size
+        self.geometry("1340x768")  # setting the window's size
         self.configure(bg="#3A7FF6")
 
         self.tabControl = ttk.Notebook(self)
@@ -59,6 +59,7 @@ class Tab1(ttk.Frame):
         self.btn_search_img = tk.PhotoImage(file=relative_to_assets("btn_search.png"))
         self.bg_dropdown_img = tk.PhotoImage(file=relative_to_assets("bg_dropdown.png"))
         self.btn_process_img = tk.PhotoImage(file=relative_to_assets("btn_process.png"))
+        self.btn_updrs_img = tk.PhotoImage(file=relative_to_assets("btn_updrs.png"))
         self.btn_vidplay_img = tk.PhotoImage(file=relative_to_assets("btn_play.png"))
         self.btn_vidpause_img = tk.PhotoImage(file=relative_to_assets("btn_pause.png"))
         self.btn_vidfirst_img = tk.PhotoImage(file=relative_to_assets("btn_first.png"))
@@ -67,7 +68,7 @@ class Tab1(ttk.Frame):
 
     def create_widgets(self):
         # Title
-        self.canvas.create_text(31.0, 25.0, anchor="nw", text="Seleccionar prueba", fill="#FFFFFF",
+        self.canvas.create_text(37.0, 37.0, anchor="nw", text="Seleccionar prueba", fill="#FFFFFF",
                                 font=("Roboto Bold", 36 * -1))
 
         # Carpeta de descarga: text, entry, button

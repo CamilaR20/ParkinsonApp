@@ -15,8 +15,3 @@ __pycache__/
 # Environments
 venv/
 
-# Calibration images
-mov_csv/
-GUI.py
-Prueba_ParkinsonMovements.py
-

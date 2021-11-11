@@ -67,72 +67,79 @@ class Tab1(ttk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
+        # Designed in Figma:  python -m tkdesigner.cli https://www.figma.com/file/GcRYERiKk0H1PANbqdzRIB/ParkinsonApp 241287-74f848a3-c833-4c4c-8b3a-109feaf486d2
         # Title
-        self.canvas.create_text(37.0, 37.0, anchor="nw", text="Seleccionar prueba", fill="#FFFFFF",
+        self.canvas.create_text(37.0, 25.0, anchor="nw", text="Seleccionar prueba", fill="#FFFFFF",
                                 font=("Roboto Bold", 36 * -1))
 
-        # Carpeta de descarga: text, entry, button
+        # Carpeta de descarga: text, label, button
         self.canvas.create_text(55.0, 80.0, anchor="nw", text="Carpeta de descarga", fill="#FFFFFF",
                                 font=("Roboto", 24 * -1))
-        self.canvas.create_image(210.0, 140, image=self.entry_img)
+        self.canvas.create_image(230.0, 140, image=self.entry_img)
         folder_label = tk.Label(self, textvariable=self.folder_var, bd=0, bg="#FFFFFF", fg="#000000",
                                 highlightthickness=0, anchor="w", font=("Roboto", 13 * -1))
-        folder_label.place(x=62.0, y=128.5, width=290.0)
+        folder_label.place(x=62.0, y=119, width=342.0, height=45.0)
         folder_btn = tk.Button(self, image=self.btn_search_img,
                                borderwidth=0,
                                highlightthickness=0,
                                command=self.get_selected_folder,
                                relief="flat")
-        folder_btn.place(x=383.0, y=120.0, width=137.0, height=47.0)
+        folder_btn.place(x=431.0, y=120.0, width=137.0, height=47.0)
 
         # ID del paciente: text, entry, button
         self.canvas.create_text(55.0, 185.0, anchor="nw", text="ID del paciente", fill="#FFFFFF",
                                 font=("Roboto", 24 * -1))
-        self.canvas.create_image(210, 245, image=self.entry_img)
+        self.canvas.create_image(230, 245, image=self.entry_img)
         patient_id = tk.Entry(self, textvariable=self.patientID_var, bd=0, bg="#FFFFFF", fg="#000000",
                               highlightthickness=0)
-        patient_id.place(x=62.0, y=222.5, width=275.0, height=45.0)
+        patient_id.place(x=62.0, y=222.5, width=342.0, height=45.0)
         search_btn = tk.Button(self, image=self.btn_search_img,
                                borderwidth=0,
                                highlightthickness=0,
                                command=self.get_tests,
                                relief="flat")
-        search_btn.place(x=383.0, y=225.0, width=137.0, height=47.0)
+        search_btn.place(x=431.0, y=225.0, width=137.0, height=47.0)
 
-        # Seleccionar: rectangle background, 3 dropdowns, process video button, UPDRS classification (btn and dropdown)
-        self.canvas.create_text(55.0, 320.0, anchor="nw", text="Seleccionar video", fill="#FFFFFF",
+        # Prueba: rectangle background, 3 dropdowns, process video button, UPDRS classification (btn and dropdown)
+        self.canvas.create_text(55.0, 290.0, anchor="nw", text="Seleccionar video", fill="#FFFFFF",
                                 font=("Roboto Bold", 24 * -1))
-        self.canvas.create_image(286.0, 480.0, image=self.bg_dropdown_img)
+        self.canvas.create_image(225.0, 420.0, image=self.bg_dropdown_img)
 
         hand_entry = tk.OptionMenu(self, self.hand_var, "Derecha", "Izquierda")
-        hand_entry.place(x=70, y=380.0, width=250.0, height=30.0)
+        hand_entry.place(x=70, y=345.0, width=250.0, height=30.0)
         hand_entry.config(bg='#FFFFFF', fg='#000000', font=("Roboto Bold", 16 * -1))
 
         movement_entry = tk.OptionMenu(self, self.movement_var, "Golpeteo de dedos", "Prono supinacion",
                                        "Cierre de puño")
-        movement_entry.place(x=70, y=440.0, width=250.0, height=30.0)
+        movement_entry.place(x=70, y=405.0, width=250.0, height=30.0)
         movement_entry.config(bg='#FFFFFF', fg='#000000', font=("Roboto Bold", 16 * -1))
 
         self.test_entry = tk.OptionMenu(self, self.test_var, 'No hay pruebas disponibles')
-        self.test_entry.place(x=70, y=500, width=250.0, height=30.0)
+        self.test_entry.place(x=70, y=465, width=250.0, height=30.0)
         self.test_entry.config(bg='#FFFFFF', fg='#000000', font=("Roboto Bold", 16 * -1))
-
-        updrs_entry = tk.OptionMenu(self, self.updrs_var, '0', '1', '2', '3', '4')
-        updrs_entry.place(x=380, y=440, width=80.0, height=30.0)
-        updrs_entry.config(bg='#FFFFFF', fg='#000000', font=("Roboto Bold", 16 * -1))
 
         process_btn = tk.Button(self, image=self.btn_process_img, borderwidth=0, highlightthickness=0,
                                 command=self.download_test, relief="flat")
-        process_btn.place(x=80.0, y=620.0, width=200.0, height=47.0)
-
-        self.updrs_btn = tk.Button(self, text="Clasicación UPDRS", borderwidth=0, highlightthickness=0,
-                                   command=self.updrs_clasification, relief="flat", state=tk.DISABLED)
-        self.updrs_btn.place(x=320.0, y=620.0, width=200.0, height=47.0)
+        process_btn.place(x=431.0, y=470.0, width=137.0, height=47.0)
 
         # Process Label
-        self.process_label = tk.Label(self, textvariable=self.process_var, bd=0, bg="#FFFFFF", fg="#888888",
+        self.process_label = tk.Label(self, textvariable=self.process_var, bd=0, bg="#3A7FF6", fg="#C4C4C4",
                                       highlightthickness=0, anchor="w", font=("Roboto", 16 * -1))
-        self.process_label.place(x=80, y=550)
+        self.process_label.place(x=431, y=520, width=137)
+        self.process_label.configure(anchor="center")
+
+        # Clasificar en escala UPDRS: text, bg, dropdown, btn
+        self.canvas.create_text(55.0, 550.0, anchor="nw", text="Clasificar en escala UPDRS", fill="#FFFFFF", font=("Roboto", 24 * -1))
+        self.canvas.create_image(230, 610, image=self.entry_img)
+
+        updrs_entry = tk.OptionMenu(self, self.updrs_var, '0', '1', '2', '3', '4')
+        updrs_entry.place(x=70, y=597, width=250.0, height=30.0)
+        updrs_entry.config(bg='#FFFFFF', fg='#000000', font=("Roboto Bold", 16 * -1))
+
+        self.updrs_btn = tk.Button(self, image=self.btn_updrs_img, text="Clasicación UPDRS", borderwidth=0, highlightthickness=0,
+                                   command=self.updrs_clasification, relief="flat", state=tk.DISABLED)
+        self.updrs_btn.place(x=431.0, y=590.0, width=137.0, height=47.0)
+
 
         # Gray rectangle where video will play
         self.canvas.create_rectangle(640.0, 0.0, 1280.0, 720.0, fill="#C4C4C4", outline="")
@@ -342,8 +349,11 @@ class Tab2(ttk.Frame):
         self.canvas.place(x=0, y=0)
 
         # Assets
+        self.entry2_img = tk.PhotoImage(file=relative_to_assets("entry_2.png"))
         self.btn_analyze_img = tk.PhotoImage(file=relative_to_assets("btn_analyze.png"))
         self.btn_change_img = tk.PhotoImage(file=relative_to_assets("btn_change.png"))
+        self.btn_cursor1_img = tk.PhotoImage(file=relative_to_assets("btn_cursor1.png"))
+        self.btn_cursor2_img = tk.PhotoImage(file=relative_to_assets("btn_cursor2.png"))
         self.bg_plot_img = tk.PhotoImage(file=relative_to_assets("bg_plot.png"))
 
         # Variables
@@ -358,6 +368,7 @@ class Tab2(ttk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
+        # Designed in Figma: python -m tkdesigner.cli https://www.figma.com/file/6fJLeJHJKuJx98JHZC516I/ParkinsonApp2 241287-74f848a3-c833-4c4c-8b3a-109feaf486d2
         global tab1
         # Title
         self.canvas.create_text(31.0, 44.0, anchor="nw", text="Analizar prueba", fill="#FFFFFF",
@@ -365,7 +376,7 @@ class Tab2(ttk.Frame):
         # Selected test: text, label, button
         self.canvas.create_text(456.0, 54.0, anchor="nw", text="Prueba seleccionada", fill="#FFFFFF",
                                 font=("Roboto", 24 * -1))
-        self.canvas.create_image(846.0, 67.0, image=tab1.entry_img)
+        self.canvas.create_image(846.0, 67.0, image=self.entry2_img)
         test_label = tk.Label(self, textvariable=tab1.test_var, bd=0, bg="#FFFFFF", fg="#000000", highlightthickness=0,
                               anchor="w", font=("Roboto", 13 * -1))
         test_label.place(x=705.0, y=57, width=290.0)
@@ -377,40 +388,22 @@ class Tab2(ttk.Frame):
         plot1_btn = tk.Button(self, image=self.btn_change_img, borderwidth=0, highlightthickness=0,
                               command=self.toggle_plot1, relief="flat")
         plot1_btn.place(x=395.0, y=574.0, width=206.0, height=47.0)
+        cursor_graph1_btn = tk.Button(self, image=self.btn_cursor1_img, borderwidth=0, highlightthickness=0,
+                                      command=lambda: self.cursor_graph1(), relief="flat")
+        cursor_graph1_btn.place(x=56, y=574.0, width=123.0, height=47.0)
+        cursor_graph2_btn = tk.Button(self, image=self.btn_cursor2_img, borderwidth=0, highlightthickness=0,
+                                      command=lambda: self.cursor_graph2(), relief="flat")
+        cursor_graph2_btn.place(x=198, y=574.0, width=123.0, height=47.0)
 
         # Graph 2: background and button
         self.canvas.create_image(945.0, 343.0, image=self.bg_plot_img)
         plot2_btn = tk.Button(self, image=self.btn_change_img, borderwidth=0, highlightthickness=0,
                               command=self.toggle_plot2, relief="flat")
         plot2_btn.place(x=1020.0, y=574.0, width=206.0, height=47.0)
-
-        cursor_graph1_btn = tk.Button(self, text='Cursor 1',
-                                      borderwidth=0,
-                                      highlightthickness=0,
-                                      command=lambda: self.cursor_graph1(),
-                                      relief="flat")
-        cursor_graph1_btn.place(x=80, y=574.0, width=206.0, height=47.0)
-
-        cursor_graph2_btn = tk.Button(self, text='Cursor 2',
-                                      borderwidth=0,
-                                      highlightthickness=0,
-                                      command=lambda: self.cursor_graph2(),
-                                      relief="flat")
-        cursor_graph2_btn.place(x=80, y=630.0, width=206.0, height=47.0)
-
-        cursor_graph3_btn = tk.Button(self, text='Cursor 3',
-                                      borderwidth=0,
-                                      highlightthickness=0,
-                                      command=lambda: self.cursor_graph3(),
-                                      relief="flat")
-        cursor_graph3_btn.place(x=700, y=574.0, width=206.0, height=47.0)
-
-        cursor_graph4_btn = tk.Button(self, text='Cursor 4',
-                                      borderwidth=0,
-                                      highlightthickness=0,
-                                      command=lambda: self.cursor_graph4(),
-                                      relief="flat")
-        cursor_graph4_btn.place(x=700, y=630.0, width=206.0, height=47.0)
+        cursor_graph3_btn = tk.Button(self, image=self.btn_cursor1_img, borderwidth=0, highlightthickness=0, command=lambda: self.cursor_graph3(), relief="flat")
+        cursor_graph3_btn.place(x=664, y=574.0, width=123.0, height=47.0)
+        cursor_graph4_btn = tk.Button(self, image=self.btn_cursor2_img, borderwidth=0, highlightthickness=0, command=lambda: self.cursor_graph4(), relief="flat")
+        cursor_graph4_btn.place(x=806, y=574, width=123.0, height=47.0)
 
     def analyze_video(self):
         # Get features from video

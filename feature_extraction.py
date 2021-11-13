@@ -1,3 +1,4 @@
+import os
 import cv2
 import mediapipe as mp
 import csv
@@ -10,6 +11,9 @@ import matplotlib.pyplot as plt
 
 
 def get_trajectory(csv_path, video_path):
+    if os.path.isfile(csv_path):
+        return
+
     camera = cv2.VideoCapture(video_path)
     mp_hands = mp.solutions.hands
 
@@ -35,7 +39,6 @@ def get_trajectory(csv_path, video_path):
                     f_writer.writerow(row)
             frame += 1
 
-    return fps
 
 
 class Parkinson_movements:
@@ -70,9 +73,9 @@ class Parkinson_movements:
         f_max = mov_freq(self.mov_filt, self.fs, self.movement)  # Main frequency of signal
         print(f_max)
         f_min = max(0.0001, f_max - 1)
-        Num = signal.firwin(15, [2 * (f_min) / self.fs, 2 * (f_max + 1) / self.fs],
+        Num = signal.firwin(11, [2 * (f_min) / self.fs, 2 * (f_max + 1) / self.fs],
                             pass_zero='bandpass')  # Design FIR filter
-        fir_freqz(Num, self.fs)
+        # fir_freqz(Num, self.fs)
         mov_filter = sp.signal.filtfilt(Num, 1, self.mov_filt, axis=0, padtype=None, padlen=None, irlen=None)
         self.mov_filter = mov_filter[7:-5, :]  # Remove padding
         # plot_mov(t, mov_filter, movement, 'filtro pasa-bandas')
@@ -203,18 +206,19 @@ def mov_freq(mov, fs, movement):
 
 def mov_localmax(t, mov, f_max, fps, movement, show):
     if f_max < 0.9:
-        min_sep = max(fps // (1.5*f_max), 4)
+        min_sep = int(0.66*max(fps / f_max, 4))
     else:
-        min_sep = max(fps // f_max - 5, 4)
-    print(fps // f_max - 5)
+        min_sep = int(0.66*max(fps / f_max, 4))
+    print(fps / f_max)
     print(min_sep)
+    # min_sep = 20
     idx_max = np.full(mov.shape, False)  # Logical array to store max locations
     for i in range(mov.shape[1]):
         # Find peaks idx for each column (finger trajectory in an axis)
         peaks, properties = signal.find_peaks(mov[:, i], distance=min_sep, height=0, prominence=0)
-        #prominences = properties["prominences"]
-        n_peaks = len(peaks)
         idx_max[peaks[0:10], i] = True
+        # prominences = properties["prominences"]
+        # n_peaks = len(peaks)
         # if n_peaks != 0:
         #     if n_peaks > 10:
         #         # Take the 10 peaks with higher prominence

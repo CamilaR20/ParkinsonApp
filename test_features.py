@@ -52,7 +52,7 @@ def plot_localmax(t, idx_max, mov, movement):
         plt.xlabel('Tiempo (s)')
         plt.ylabel('Amplitud')
         plt.title('Finger tapping en y - Máximos Locales')
-        plt.legend(['Pulgar', 'Max pulgar', 'Índice', 'Max indice'], loc='upper right')
+        plt.legend(['Pulgar', 'Max pulgar', 'Índice', 'Max indice'], loc='lower right')
         # plt.show()
     elif movement == 'pronosup':
         plt.figure()
@@ -64,7 +64,7 @@ def plot_localmax(t, idx_max, mov, movement):
         plt.xlabel('Tiempo (s)')
         plt.ylabel('Amplitud')
         plt.title('Pronosupinacion en x - Máximos Locales')
-        plt.legend(['Pulgar', 'Max pulgar', 'Meñique', 'Max meñique'], loc='upper right')
+        plt.legend(['Pulgar', 'Max pulgar', 'Meñique', 'Max meñique'], loc='lower right')
         # plt.show()
     else:
         plt.figure()
@@ -76,21 +76,19 @@ def plot_localmax(t, idx_max, mov, movement):
         plt.xlabel('Tiempo (s)')
         plt.ylabel('Amplitud')
         plt.title('Fist open-close en y - Máximos Locales')
-        plt.legend(['Pulgar', 'Max pulgar', 'Índice', 'Max indice'], loc='upper right')
+        plt.legend(['Pulgar', 'Max pulgar', 'Índice', 'Max indice'], loc='lower right')
 
 
 if __name__ == '__main__':
-    main_path = '/Users/camilaroa/Downloads/ParkinsonVideos/0004/07-10-2021, 09:47, ON'
-    movement = 'fingertap'
-    finger = 'l'
+    main_path = '/Users/camilaroa/Downloads/ParkinsonVideos/0023/11-11-2021, 10-23, ON'
+    movement = 'pronosup'
+    finger = 'r'
     video_path = os.path.join(main_path, movement + '_' + finger + '.mp4')
     csv_path = os.path.join(main_path, movement + '_' + finger + '.csv')
     fps = 30
 
-    if not os.path.isfile(csv_path):
-        fps = get_trajectory(csv_path, video_path)
+    get_trajectory(csv_path, video_path)
 
-    print(fps)
 
     video_features = Parkinson_movements(csv_path, movement, fps)
     video_features.filter_signal()

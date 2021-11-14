@@ -223,8 +223,10 @@ class Tab1(ttk.Frame):
             os.remove(download_folder + '/' + folder_path + "/test.zip")
 
         self.mov_eval, hand_name = get_moveval(self.movement_var.get(), self.hand_var.get())
-        video_path = download_folder + '/' + folder_path + '/' + self.mov_eval + hand_name + '.mp4'
-        self.csv_path = download_folder + '/' + folder_path + '/' + self.mov_eval + hand_name + '.csv'
+        file_path = download_folder + '/' + folder_path + '/' + self.mov_eval + hand_name
+        video_path = file_path + '.mp4'
+        self.csv_path = file_path + '.csv'
+        self.picture_path = file_path + '.jpg'
 
         self.video_cap = cv2.VideoCapture(video_path)
 
@@ -409,11 +411,12 @@ class Tab2(ttk.Frame):
         # Get features from video
         global tab1
         csv_path = tab1.csv_path
+        picture_path = tab1.picture_path
         mov_eval = tab1.mov_eval
         fps = tab1.video_fps
         mov = tab1.movement_var.get()
 
-        video_features = Parkinson_movements(csv_path, mov_eval, fps)
+        video_features = Parkinson_movements(csv_path, picture_path, mov_eval, fps)
         video_features.filter_signal()
         video_features.calc_speed()
 

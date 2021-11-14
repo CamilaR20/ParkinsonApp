@@ -51,11 +51,14 @@ def get_calibration_distance(picture_path):
 
 
 class Parkinson_movements:
-    def __init__(self, filename, movement, fps):
-        self.mov = genfromtxt(filename, delimiter=',')
+    def __init__(self, csv_path, picture_path, movement, fps):
+        self.mov = genfromtxt(csv_path, delimiter=',')
         self.movement = movement
         self.fs = fps
         self.organize_signal()
+        self.calibrate(picture_path)
+        # PADDING
+        self.mov_pad = np.pad(self.mov, ((6, 6), (0, 0)), 'symmetric')
 
     def organize_signal(self):
         # Rearange matrix with trajectories
@@ -68,8 +71,9 @@ class Parkinson_movements:
         self.t0 = mov[:, 0]
         self.mov = np.delete(mov, 0, axis=1)
 
-        # PADDING
-        self.mov_pad = np.pad(self.mov, ((6, 6), (0, 0)), 'symmetric')
+    def calibrate(self, picture_path):
+        dist = get_calibration_distance(picture_path)
+        self.mov = self.mov / dist
 
     def filter_signal(self):
         # HIGH PASS FILTER

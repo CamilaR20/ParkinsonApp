@@ -40,6 +40,15 @@ def get_trajectory(csv_path, video_path):
             frame += 1
 
 
+def get_calibration_distance(picture_path):
+    image = cv2.imread(picture_path)
+    mp_hands = mp.solutions.hands
+    with mp_hands.Hands(static_image_mode=True, max_num_hands=1, min_detection_confidence=0.5) as hands:
+        results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        hand_landmarks = results.multi_hand_landmarks[0]
+        distance = hand_landmarks.landmark[0].y - hand_landmarks.landmark[9].y
+    return distance
+
 
 class Parkinson_movements:
     def __init__(self, filename, movement, fps):
@@ -70,10 +79,10 @@ class Parkinson_movements:
         # plot_mov(t, mov_filt[7:-5], movement, ' filtro pasa-altas')
 
         # BAND PASS FILTER
-        f_max = mov_freq(self.mov_filt, self.fs, self.movement)  # Main frequency of signal
-        print(f_max)
-        f_min = max(0.0001, f_max - 1)
-        Num = signal.firwin(11, [2 * (f_min) / self.fs, 2 * (f_max + 1) / self.fs],
+        self.f_max, self.mov_fft, self.freq, self.idx_fmax = mov_freq(self.mov_filt, self.fs, self.movement)  # Main frequency of signal
+        # print(self.f_max)
+        f_min = max(0.0001, self.f_max - 1)
+        Num = signal.firwin(11, [2 * (f_min) / self.fs, 2 * (self.f_max + 1) / self.fs],
                             pass_zero='bandpass')  # Design FIR filter
         # fir_freqz(Num, self.fs)
         mov_filter = sp.signal.filtfilt(Num, 1, self.mov_filt, axis=0, padtype=None, padlen=None, irlen=None)
@@ -81,7 +90,7 @@ class Parkinson_movements:
         # plot_mov(t, mov_filter, movement, 'filtro pasa-bandas')
 
         # LOCAL MAXIMA
-        idx_max = mov_localmax(self.t0, self.mov_filter, f_max, self.fs, self.movement, False)
+        idx_max = mov_localmax(self.t0, self.mov_filter, self.f_max, self.fs, self.movement, False)
         self.t1, self.mov_cut, self.idx_max = cut_mov(self.t0, self.mov_filter, idx_max, self.movement)
 
     def calc_speed(self):
@@ -200,18 +209,15 @@ def mov_freq(mov, fs, movement):
         finger = 29 # Indice en y
 
     [mov_fft, freq] = fft_mov(mov, fs, False)
-    f_max = freq[np.argmax(mov_fft[:, finger])]
-    return f_max
+    idx_fmax = np.argmax(mov_fft[:, finger])
+    f_max = freq[idx_fmax]
+    return f_max, mov_fft, freq, idx_fmax
 
 
 def mov_localmax(t, mov, f_max, fps, movement, show):
-    if f_max < 0.9:
-        min_sep = int(0.66*max(fps / f_max, 4))
-    else:
-        min_sep = int(0.66*max(fps / f_max, 4))
-    print(fps / f_max)
-    print(min_sep)
-    # min_sep = 20
+    min_sep = int(0.66*max(fps / f_max, 4))
+    # print(fps / f_max)
+    # print(min_sep)
     idx_max = np.full(mov.shape, False)  # Logical array to store max locations
     for i in range(mov.shape[1]):
         # Find peaks idx for each column (finger trajectory in an axis)
@@ -293,7 +299,7 @@ def periods_mov(t, idx_max):
     periods = np.empty([9, columns])
     periods[:] = np.NaN
     for i in range(columns):
-        t_localmax = t[idx_max[:, i].astype(np.bool)]
+        t_localmax = t[idx_max[:, i].astype(bool)]
         diff_t = np.diff(t_localmax)
         periods[0:len(diff_t), i] = diff_t
     return periods

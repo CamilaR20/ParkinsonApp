@@ -80,9 +80,9 @@ def plot_localmax(t, idx_max, mov, movement):
 
 
 if __name__ == '__main__':
-    main_path = '/Users/camilaroa/Downloads/ParkinsonVideos/0023/11-11-2021, 10-23, ON'
-    movement = 'pronosup'
-    finger = 'r'
+    main_path = '/Users/camilaroa/Downloads/ParkinsonVideos/0004/07-10-2021, 09-47, ON'
+    movement = 'fist'
+    finger = 'l'
     video_path = os.path.join(main_path, movement + '_' + finger + '.mp4')
     csv_path = os.path.join(main_path, movement + '_' + finger + '.csv')
     fps = 30
@@ -92,9 +92,9 @@ if __name__ == '__main__':
 
     video_features = Parkinson_movements(csv_path, movement, fps)
     video_features.filter_signal()
-    plot_mov(video_features.t0, video_features.mov, movement, 'señal original')
-    plot_mov(video_features.t0, video_features.mov_filt[7:-5], movement, ' filtro pasa-altas')
-    plot_mov(video_features.t0, video_features.mov_filter, movement, 'filtro pasa-bandas')
+    # plot_mov(video_features.t0, video_features.mov, movement, 'señal original')
+    # plot_mov(video_features.t0, video_features.mov_filt[7:-5], movement, ' filtro pasa-altas')
+    # plot_mov(video_features.t0, video_features.mov_filter, movement, 'filtro pasa-bandas')
     plot_mov(video_features.t1, video_features.mov_cut, movement, 'Señal segmentada')
     plot_localmax(video_features.t1, video_features.idx_max, video_features.mov_cut, movement)
 

@@ -56,7 +56,7 @@ class Parkinson_movements:
         self.movement = movement
         self.fs = fps
         self.organize_signal()
-        self.calibrate(picture_path)
+        # self.calibrate(picture_path)
         # PADDING
         self.mov_pad = np.pad(self.mov, ((6, 6), (0, 0)), 'symmetric')
 
@@ -70,6 +70,17 @@ class Parkinson_movements:
         # Drop Z and separate time vector
         self.t0 = mov[:, 0]
         self.mov = np.delete(mov, 0, axis=1)
+
+        # add signal to classify at the end of array
+        if self.movement == 'fingertap':
+            trajectory = self.mov[:, 29] - self.mov[:, 25]
+        elif self.movement == 'pronosup':
+            trajectory = self.mov[:, 4] - self.mov[:, 20]
+        else:
+            # trajectory = ((self.mov[:, 29] + self.mov[:, 33] + self.mov[:, 37] + self.mov[:, 40]) / 4) - self.mov[:, 25]
+            trajectory = ((self.mov[:, 29] + self.mov[:, 33] + self.mov[:, 37] + self.mov[:, 40]) / 4)
+
+        self.mov = np.append(self.mov, trajectory.reshape((len(trajectory), 1)), axis=1)
 
     def calibrate(self, picture_path):
         dist = get_calibration_distance(picture_path)
@@ -101,11 +112,12 @@ class Parkinson_movements:
         # SPEED CALCULATED AS DERIVATIVE
         self.speed = np.diff(self.mov_cut, axis=0)
 
-    def calc_periods(self):
+    def calc_periods(self, show=False):
         # MOVEMENT PERIODICITY
         periods = periods_mov(self.t1, self.idx_max)
-        plt.figure()
-        plt.boxplot([periods[~np.isnan(periods[:, 25]), 25], periods[~np.isnan(periods[:, 29]), 29]])
+        if show:
+            plt.figure()
+            plt.boxplot([periods[~np.isnan(periods[:, 25]), 25], periods[~np.isnan(periods[:, 29]), 29]])
 
     def calc_fft(self):
         # FFT

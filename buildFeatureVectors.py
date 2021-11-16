@@ -32,6 +32,7 @@ if __name__ == '__main__':
         csv_path = test_path + '.csv'
         picture_path = test_path + '.jpg'
         video_path = test_path + '.mp4'
+        # print(video_path)
 
         get_trajectory(csv_path, video_path)
         video_features = Parkinson_movements(csv_path, picture_path, movement, fps)
@@ -48,9 +49,10 @@ if __name__ == '__main__':
 
         # Get local max
         idx_max = video_features.idx_max[:, -1]
+        periods = signal_periods(t, idx_max)
 
         # Features
-        t_std = np.std(signal_periods(t, idx_max))
+        t_std = np.std(periods) / np.mean(periods)  #Normalize by mean?
         axf = np.mean(trajectory[idx_max]) * f_max
         trend_slope, trend = signal_amplitudeTrend(t, trajectory)
         energy_fmax = trajectory_fft[idx_fmax] / np.sum(trajectory_fft)

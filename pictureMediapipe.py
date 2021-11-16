@@ -4,7 +4,7 @@ import cv2
 import mediapipe as mp
 
 if __name__ == '__main__':
-    folder_path = '/Users/camilaroa/Downloads/ParkinsonVideos/0004/07-10-2021, 09-47, ON'
+    folder_path = '/Users/camilaroa/Downloads/ParkinsonVideos/0007/13-10-2021, 13-36, ON'
     movements = ['fingertap_r', 'fingertap_l', 'pronosup_r', 'pronosup_l', 'fist_r', 'fist_l']
 
     for movement in movements:
@@ -20,7 +20,7 @@ if __name__ == '__main__':
             # print('Handedness:', results.multi_handedness)
             annotated_image = image.copy()
             for hand_landmarks in results.multi_hand_landmarks:
-                distance = hand_landmarks.landmark[0].y - hand_landmarks.landmark[9].y
+                distance = abs(hand_landmarks.landmark[0].y - hand_landmarks.landmark[9].y)
                 print(distance)
 
                 mp_drawing.draw_landmarks(annotated_image, hand_landmarks, mp_hands.HAND_CONNECTIONS)

@@ -46,7 +46,7 @@ def get_calibration_distance(picture_path):
     with mp_hands.Hands(static_image_mode=True, max_num_hands=1, min_detection_confidence=0.5) as hands:
         results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
         hand_landmarks = results.multi_hand_landmarks[0]
-        distance = hand_landmarks.landmark[0].y - hand_landmarks.landmark[9].y
+        distance = abs(hand_landmarks.landmark[0].y - hand_landmarks.landmark[9].y)
     return distance
 
 
@@ -56,7 +56,7 @@ class Parkinson_movements:
         self.movement = movement
         self.fs = fps
         self.organize_signal()
-        # self.calibrate(picture_path)
+        self.calibrate(picture_path)
         # PADDING
         self.mov_pad = np.pad(self.mov, ((6, 6), (0, 0)), 'symmetric')
 
@@ -106,7 +106,7 @@ class Parkinson_movements:
 
         # LOCAL MAXIMA
         idx_max = mov_localmax(self.t0, self.mov_filter, self.f_max, self.fs, self.movement, False)
-        self.t1, self.mov_cut, self.idx_max = cut_mov(self.t0, self.mov_filter, idx_max, self.movement)
+        self.t1, self.mov_cut, self.idx_max = cut_mov(self.t0, self.mov_filter, idx_max, self.f_max, self.movement)
 
     def calc_speed(self):
         # SPEED CALCULATED AS DERIVATIVE
@@ -232,8 +232,6 @@ def mov_freq(mov, fs, movement):
 
 def mov_localmax(t, mov, f_max, fps, movement, show):
     min_sep = int(0.66*max(fps / f_max, 4))
-    # print(fps / f_max)
-    # print(min_sep)
     idx_max = np.full(mov.shape, False)  # Logical array to store max locations
     for i in range(mov.shape[1]):
         # Find peaks idx for each column (finger trajectory in an axis)
@@ -288,7 +286,7 @@ def mov_localmax(t, mov, f_max, fps, movement, show):
     return idx_max
 
 
-def cut_mov(t, mov, idx_max, movement):
+def cut_mov(t, mov, idx_max, f_max, movement):
     # Segment signal: first index is 7 samples before the first max and last index is 7 samples after last max
     if movement == 'pronosup':
         finger = 4  # Pulgar en x
@@ -298,10 +296,10 @@ def cut_mov(t, mov, idx_max, movement):
         finger = 29 # Indice en y
 
     first_max = np.where(idx_max[:, finger])[0][0]
-    no = int(max([first_max - 7, 0]))
+    no = int(max([first_max - (1/(4 * f_max)), 0]))
 
     last_max = np.where(idx_max[:, finger])[-1][-1]
-    nf = int(min([last_max + 7, mov.shape[0]]))
+    nf = int(min([last_max + (1/(4 * f_max)), mov.shape[0]]))
 
     t = t[no:nf]
     mov = mov[no:nf, :]

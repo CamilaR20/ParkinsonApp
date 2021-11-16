@@ -12,6 +12,9 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_predict
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import ConfusionMatrixDisplay
 
 
 if __name__ == '__main__':
@@ -29,15 +32,30 @@ if __name__ == '__main__':
     # X = MinMaxScaler().fit_transform(X)
     y = features[:, -1]
 
-    clf = LinearSVC(random_state=0, dual=False, tol=1e-5)
+
+    # clf = LinearSVC(random_state=0, dual=False, tol=1e-5)
     # clf = SVC(random_state=0, tol=1e-5, kernel='rbf')
-    # clf = KNeighborsClassifier(1)
+    # clf = SVC(random_state=0, tol=1e-5, kernel='poly', degree=3)
+    # clf = KNeighborsClassifier(8)
     # clf = GaussianNB()
-    # clf = MLPClassifier(max_iter=1000) # Neural net
+    clf = MLPClassifier(max_iter=700, random_state=0) # Neural net
     scores = cross_val_score(clf, X, y, cv=10)
+    print(scores)
     print("%0.2f accuracy with a standard deviation of %0.2f" % (scores.mean(), scores.std()))
 
-    # X_train, X_test, y_train, y_test = train_test_split(features[:, :-1], features[:, -1], test_size=0.1, random_state=42, stratify=features[:, -1])
+    X_train, X_test, y_train, y_test = train_test_split(features[:, :-1], features[:, -1], test_size=0.2, random_state=42, stratify=features[:, -1])
+    clf.fit(X_train, y_train)
+
+    disp = ConfusionMatrixDisplay.from_estimator(
+        clf,
+        X_test,
+        y_test,
+        display_labels=['Parkinson', 'Control'],
+        cmap=plt.cm.Blues,
+        normalize=None
+    )
+    disp.ax_.set_title('Confusion Matrix')
+    plt.show()
 
     # plt.figure()
     # sns.countplot(y, palette=["#f7d754", "#87b212"])

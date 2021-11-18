@@ -4,7 +4,7 @@ import cv2
 import mediapipe as mp
 
 if __name__ == '__main__':
-    folder_path = '/Users/camilaroa/Downloads/ParkinsonVideos/0007/13-10-2021, 13-36, ON'
+    folder_path = '/Users/camilaroa/Downloads/ParkinsonVideos/0005/07-10-2021, 10-57, ON'
     movements = ['fingertap_r', 'fingertap_l', 'pronosup_r', 'pronosup_l', 'fist_r', 'fist_l']
 
     for movement in movements:

@@ -32,16 +32,18 @@ if __name__ == '__main__':
         csv_path = test_path + '.csv'
         picture_path = test_path + '.jpg'
         video_path = test_path + '.mp4'
-        # print(video_path)
+        print(video_path)
 
         get_trajectory(csv_path, video_path)
         video_features = Parkinson_movements(csv_path, picture_path, movement, fps)
         video_features.filter_signal()
+        video_features.calc_speed()
 
         t = video_features.t1
         trajectory = video_features.mov_cut[:, -1]
         trajectory_fft = video_features.mov_fft[:, -1]
         trajectory_freq = video_features.freq
+        trajectory_speed = video_features.speed[:, -1]
 
         f_max = video_features.f_max
         idx_fmax = video_features.idx_fmax
@@ -52,16 +54,19 @@ if __name__ == '__main__':
         periods = signal_periods(t, idx_max)
 
         # Features
-        t_std = np.std(periods) / np.mean(periods)  #Normalize by mean?
+        t_std = 1 if len(periods) == 0 else np.std(periods) / np.mean(periods)
         axf = np.mean(trajectory[idx_max]) * f_max
         trend_slope, trend = signal_amplitudeTrend(t, trajectory)
         energy_fmax = trajectory_fft[idx_fmax] / np.sum(trajectory_fft)
+        speed_slope, speed_trend = signal_amplitudeTrend(t[:-1], trajectory_speed)
+        # Diferencia izquierda - derecha, relación entre amplitud y velocidad
 
         feature_vector.loc[idx, 'f_max'] = f_max
         feature_vector.loc[idx, 't_std'] = t_std
         feature_vector.loc[idx, 'axf'] = axf
         feature_vector.loc[idx, 'trend_slope'] = trend_slope
         feature_vector.loc[idx, 'energy_fmax'] = energy_fmax
+        feature_vector.loc[idx, 'speed_slope'] = speed_slope
         feature_vector.loc[idx, 'bradykinesia'] = 1 - int(filename['PatientID'][0])
 
         # plt.figure()
@@ -79,8 +84,6 @@ if __name__ == '__main__':
         # plt.xlabel('frecuencia (Hz)')
         # plt.ylabel('Amplitud')
         # plt.title(movement + '' + filename['Hand'] + ' - ' + str(idx))
-
-
         # plt.show()
 
     # print(feature_vector.head())

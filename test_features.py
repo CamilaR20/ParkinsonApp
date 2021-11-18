@@ -80,9 +80,9 @@ def plot_localmax(t, idx_max, mov, movement):
 
 
 if __name__ == '__main__':
-    main_path = '/Users/camilaroa/Downloads/ParkinsonVideos/0015/04-11-2021, 09-37, ON'
-    movement = 'pronosup'
-    finger = 'l'
+    main_path = '/Users/camilaroa/Downloads/ParkinsonVideos/1018/12-11-2021, 17-04, OFF'
+    movement = 'fist'
+    finger = 'r'
     video_path = os.path.join(main_path, movement + '_' + finger + '.mp4')
     csv_path = os.path.join(main_path, movement + '_' + finger + '.csv')
     picture_path = os.path.join(main_path, movement + '_' + finger + '.jpg')

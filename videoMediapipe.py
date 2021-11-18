@@ -3,7 +3,7 @@ import mediapipe as mp
 import csv
 
 if __name__ == '__main__':
-    camera = cv2.VideoCapture("/Users/camilaroa/Downloads/ParkinsonVideos/0012/27-10-2021, 17-06, OFF/pronosup_l.mp4")
+    camera = cv2.VideoCapture('/Users/camilaroa/Desktop/fingertap_r.mov')
     mp_drawing = mp.solutions.drawing_utils
     mp_hands = mp.solutions.hands
 

@@ -33,42 +33,44 @@ if __name__ == '__main__':
     clf = LinearSVC(random_state=0, dual=False, tol=1e-5)
     # clf = SVC(random_state=0, tol=1e-5, kernel='rbf')
     # clf = SVC(random_state=0, tol=1e-5, kernel='poly', degree=3)
-    # clf = KNeighborsClassifier(8)
+    # clf = KNeighborsClassifier(5)
     # clf = LinearDiscriminantAnalysis()
-    # clf = MLPClassifier(max_iter=700, random_state=0) # Neural net
+    # clf = MLPClassifier(max_iter=700, random_state=10) # Neural net
     # LDA instead of NB
     scores = cross_val_score(clf, X, y, cv=4)
     print(scores)
     print("%0.2f accuracy with a standard deviation of %0.2f" % (scores.mean(), scores.std()))
-    #
-    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=features[:, -1])
-    # clf.fit(X_train, y_train)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=40, stratify=features[:, -1])
+    clf.fit(X_train, y_train)
+    # predictions = clf.predict(X_test)
+    # X_miss = X_test[y_test != predictions, :]
 
     # Confusion matrix
-    # disp = ConfusionMatrixDisplay.from_estimator(clf, X_test, y_test, display_labels=classes, cmap=plt.cm.Blues, normalize=None)
-    # disp.ax_.set_title('Confusion Matrix')
+    disp = ConfusionMatrixDisplay.from_estimator(clf, X_test, y_test, display_labels=classes, cmap=plt.cm.Blues, normalize=None)
+    disp.ax_.set_title('Confusion Matrix')
 
     # Features distribution plot
-    feature_names = ['Frequency', 'Periods STD', 'Amplitude x frequency', 'Amplitude trend slope', 'Energy fmax (%)', 'Speed trend slope']
-    fig1 = plt.figure()
-    ax1 = fig1.add_subplot(projection='3d')
-    s = ax1.scatter(X[:, 0], X[:, 4], X[:, 2], alpha=0.2, c=y, cmap='prism')
-    ax1.set_xlabel(feature_names[0])
-    ax1.set_ylabel(feature_names[4])
-    ax1.set_zlabel(feature_names[2])
-    plt.legend(*s.legend_elements(), loc="upper right", title="Classes")
-
-    plt.figure()
-    s = plt.scatter(X[:, 2], X[:, 5], alpha=0.2, c=y, cmap='prism')
-    plt.xlabel(feature_names[2])
-    plt.ylabel(feature_names[5])
-    plt.legend(*s.legend_elements(), loc="upper right", title="Classes")
-
-    plt.figure()
-    s = plt.scatter(X[:, 3], X[:, 4], alpha=0.2, c=y, cmap='prism')
-    plt.xlabel(feature_names[3])
-    plt.ylabel(feature_names[4])
-    plt.legend(*s.legend_elements(), loc="upper right", title="Classes")
+    # feature_names = ['Frequency', 'Periods STD', 'Amplitude x frequency', 'Amplitude trend slope', 'Energy fmax (%)', 'Speed trend slope']
+    # fig1 = plt.figure()
+    # ax1 = fig1.add_subplot(projection='3d')
+    # s = ax1.scatter(X[:, 0], X[:, 4], X[:, 2], alpha=0.2, c=y, cmap='prism')
+    # ax1.set_xlabel(feature_names[0])
+    # ax1.set_ylabel(feature_names[4])
+    # ax1.set_zlabel(feature_names[2])
+    # plt.legend(*s.legend_elements(), loc="upper right", title="Classes")
+    #
+    # plt.figure()
+    # s = plt.scatter(X[:, 2], X[:, 5], alpha=0.2, c=y, cmap='prism')
+    # plt.xlabel(feature_names[2])
+    # plt.ylabel(feature_names[5])
+    # plt.legend(*s.legend_elements(), loc="upper right", title="Classes")
+    #
+    # plt.figure()
+    # s = plt.scatter(X[:, 3], X[:, 4], alpha=0.2, c=y, cmap='prism')
+    # plt.xlabel(feature_names[3])
+    # plt.ylabel(feature_names[4])
+    # plt.legend(*s.legend_elements(), loc="upper right", title="Classes")
 
     # Dataset classes distribution
     # plt.figure()

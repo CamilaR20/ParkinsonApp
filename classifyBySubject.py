@@ -40,20 +40,32 @@ if __name__ == '__main__':
 
     # y = np.transpose(y)
 
-    clf = LinearSVC(random_state=0, dual=False, tol=1e-5)
+    # clf = LinearSVC(random_state=0, dual=False, tol=1e-5)
     # clf = SVC(random_state=0, tol=1e-5, kernel='rbf')
     # clf = SVC(random_state=0, tol=1e-5, kernel='poly', degree=3)
-    # clf = KNeighborsClassifier(8)
+    # clf = KNeighborsClassifier(5)
     # clf = LinearDiscriminantAnalysis()
-    # clf = MLPClassifier(max_iter=700, random_state=0) # Neural net
+    clf = MLPClassifier(hidden_layer_sizes=(10,), max_iter=500, random_state=0) # Neural net
     scores = cross_val_score(clf, X, y, cv=3)
     print(scores)
     print("%0.2f accuracy with a standard deviation of %0.2f" % (scores.mean(), scores.std()))
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42, stratify=y)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=0, stratify=y)
     clf.fit(X_train, y_train)
 
+    # plt.figure()
+    # plt.plot(clf.loss_curve_)
+    # plt.xlabel('Número de iteraciones')
+    # plt.ylabel('Pérdida')
+    #
+    # print(clf.score(X_test, y_test))
+
+    predictions = clf.predict(X_test)
+    X_miss = X_test[y_test != predictions, :]
+    print(X_miss)
+
     # Confusion matrix
+    plt.figure()
     disp = ConfusionMatrixDisplay.from_estimator(clf, X_test, y_test, display_labels=classes, cmap=plt.cm.Blues, normalize=None)
     disp.ax_.set_title('Confusion Matrix')
     plt.show()

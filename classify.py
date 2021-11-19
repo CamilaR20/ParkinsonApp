@@ -30,16 +30,21 @@ if __name__ == '__main__':
     # X = MinMaxScaler().fit_transform(X)
     y = features[:, -1]
 
-    clf = LinearSVC(random_state=0, dual=False, tol=1e-5)
+    clf = LinearSVC(random_state=10, dual=False, tol=1e-5)
     # clf = SVC(random_state=0, tol=1e-5, kernel='rbf')
     # clf = SVC(random_state=0, tol=1e-5, kernel='poly', degree=3)
     # clf = KNeighborsClassifier(5)
     # clf = LinearDiscriminantAnalysis()
-    # clf = MLPClassifier(max_iter=700, random_state=10) # Neural net
-    # LDA instead of NB
-    scores = cross_val_score(clf, X, y, cv=4)
-    print(scores)
-    print("%0.2f accuracy with a standard deviation of %0.2f" % (scores.mean(), scores.std()))
+    # clf = MLPClassifier(hidden_layer_sizes=(10,), max_iter=700, random_state=0) # Neural net
+    accuracy = cross_val_score(clf, X, y, cv=3, scoring='accuracy')
+    sensitivity = cross_val_score(clf, X, y, cv=3, scoring='recall')
+    balanced_acc = cross_val_score(clf, X, y, cv=3, scoring='balanced_accuracy')
+    specificity = np.array([(2 * b) - s for s, b in zip(sensitivity, balanced_acc)])
+
+    print("%0.2f accuracy with a standard deviation of %0.2f" % (accuracy.mean(), accuracy.std()))
+    print("%0.2f sensitivity with a standard deviation of %0.2f" % (sensitivity.mean(), sensitivity.std()))
+    print("%0.2f specificity with a standard deviation of %0.2f" % (specificity.mean(), specificity.std()))
+    print("%0.2f balanced accuracy with a standard deviation of %0.2f" % (balanced_acc.mean(), balanced_acc.std()))
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=40, stratify=features[:, -1])
     clf.fit(X_train, y_train)
@@ -47,8 +52,8 @@ if __name__ == '__main__':
     # X_miss = X_test[y_test != predictions, :]
 
     # Confusion matrix
-    disp = ConfusionMatrixDisplay.from_estimator(clf, X_test, y_test, display_labels=classes, cmap=plt.cm.Blues, normalize=None)
-    disp.ax_.set_title('Confusion Matrix')
+    # disp = ConfusionMatrixDisplay.from_estimator(clf, X_test, y_test, display_labels=classes, cmap=plt.cm.Blues, normalize=None)
+    # disp.ax_.set_title('Confusion Matrix')
 
     # Features distribution plot
     # feature_names = ['Frequency', 'Periods STD', 'Amplitude x frequency', 'Amplitude trend slope', 'Energy fmax (%)', 'Speed trend slope']
